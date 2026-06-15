@@ -17,7 +17,7 @@ pub(all) struct BeTagRangeResult {
   end_line : Int
   tag : String
   content : String
-} derive(Show, ToJson, @debug.Debug)
+} derive(ToJson, @debug.Debug)
 
 // Type aliases
 

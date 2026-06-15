@@ -5,7 +5,7 @@ pub(all) struct BePair {
   open_col : Int
   close_line : Int
   close_col : Int
-} derive(Debug, Show, ToJson)
+} derive(Debug, ToJson)
 
 ///|
 pub(all) struct BeMismatch {
@@ -13,14 +13,14 @@ pub(all) struct BeMismatch {
   line : Int
   col : Int
   reason : String
-} derive(Debug, Show, ToJson)
+} derive(Debug, ToJson)
 
 ///|
 pub(all) struct BeBalanceResult {
   ok : Bool
   pairs : Array[BePair]
   mismatches : Array[BeMismatch]
-} derive(Debug, Show, ToJson)
+} derive(Debug, ToJson)
 
 ///|
 priv enum State {

@@ -5,7 +5,7 @@ pub(all) struct BeTagRangeResult {
   end_line : Int
   tag : String
   content : String
-} derive(Debug, Show, ToJson)
+} derive(Debug, ToJson)
 
 ///|
 priv struct OpenTag {

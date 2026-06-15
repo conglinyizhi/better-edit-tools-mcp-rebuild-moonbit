@@ -16,14 +16,14 @@ pub(all) struct BeBalanceResult {
   ok : Bool
   pairs : Array[BePair]
   mismatches : Array[BeMismatch]
-} derive(Show, ToJson, @debug.Debug)
+} derive(ToJson, @debug.Debug)
 
 pub(all) struct BeMismatch {
   kind : String
   line : Int
   col : Int
   reason : String
-} derive(Show, ToJson, @debug.Debug)
+} derive(ToJson, @debug.Debug)
 
 pub(all) struct BePair {
   kind : String
@@ -31,7 +31,7 @@ pub(all) struct BePair {
   open_col : Int
   close_line : Int
   close_col : Int
-} derive(Show, ToJson, @debug.Debug)
+} derive(ToJson, @debug.Debug)
 
 // Type aliases
 

@@ -4,7 +4,7 @@ pub(all) struct BeFuncRangeResult {
   start_line : Int
   end_line : Int
   content : String
-} derive(Debug, Show, ToJson)
+} derive(Debug, ToJson)
 
 ///|
 priv struct Block {
