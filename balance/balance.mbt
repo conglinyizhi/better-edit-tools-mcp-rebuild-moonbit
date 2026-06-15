@@ -1,17 +1,14 @@
 ///|
 pub(all) struct BePair {
   kind : String
-  open_line : Int
-  open_col : Int
-  close_line : Int
-  close_col : Int
+  open : @common.BeLocation
+  close : @common.BeLocation
 } derive(Debug, ToJson)
 
 ///|
 pub(all) struct BeMismatch {
   kind : String
-  line : Int
-  col : Int
+  loc : @common.BeLocation
   reason : String
 } derive(Debug, ToJson)
 
@@ -55,11 +52,10 @@ fn is_tag_name_char(c : UInt16) -> Bool {
 fn add_mismatch(
   mismatches : Array[BeMismatch],
   kind : String,
-  line : Int,
-  col : Int,
+  loc : @common.BeLocation,
   reason : String,
 ) -> Unit {
-  mismatches.push({ kind, line, col, reason })
+  mismatches.push({ kind, loc, reason })
 }
 
 ///|
@@ -67,18 +63,11 @@ fn add_pair(
   pairs : Array[BePair],
   kind : String,
   open : Open,
-  close_line : Int,
-  close_col : Int,
+  close : @common.BeLocation,
   verbose : Bool,
 ) -> Unit {
   if verbose {
-    pairs.push({
-      kind,
-      open_line: open.line,
-      open_col: open.col,
-      close_line,
-      close_col,
-    })
+    pairs.push({ kind, open: { line: open.line, col: open.col }, close })
   }
 }
 
@@ -89,14 +78,13 @@ fn handle_close(
   pairs : Array[BePair],
   verbose : Bool,
   kind : String,
-  line : Int,
-  col : Int,
+  loc : @common.BeLocation,
 ) -> Unit {
   if stack.length() == 0 || stack[stack.length() - 1].kind != kind {
-    add_mismatch(mismatches, kind, line, col, "unexpected closing \{kind}")
+    add_mismatch(mismatches, kind, loc, "unexpected closing \{kind}")
   } else {
     guard stack.pop() is Some(open) else { return }
-    add_pair(pairs, kind, open, line, col, verbose)
+    add_pair(pairs, kind, open, loc, verbose)
   }
 }
 
@@ -200,15 +188,18 @@ pub fn be_balance(
         if c == '(' {
           stack.push({ kind: "paren", name: "", line, col })
         } else if c == ')' {
-          handle_close(stack, mismatches, pairs, verbose, "paren", line, col)
+          handle_close(stack, mismatches, pairs, verbose, "paren", { line, col })
         } else if c == '{' {
           stack.push({ kind: "brace", name: "", line, col })
         } else if c == '}' {
-          handle_close(stack, mismatches, pairs, verbose, "brace", line, col)
+          handle_close(stack, mismatches, pairs, verbose, "brace", { line, col })
         } else if c == '[' {
           stack.push({ kind: "bracket", name: "", line, col })
         } else if c == ']' {
-          handle_close(stack, mismatches, pairs, verbose, "bracket", line, col)
+          handle_close(stack, mismatches, pairs, verbose, "bracket", {
+            line,
+            col,
+          })
         }
         if c == '\r' {
           if i + 1 < len && text[i + 1] == '\n' {
@@ -236,11 +227,14 @@ pub fn be_balance(
         if c == '"' {
           if stack.length() == 0 || stack[stack.length() - 1].kind != "dquote" {
             add_mismatch(
-              mismatches, "dquote", line, col, "unexpected closing quote",
+              mismatches,
+              "dquote",
+              { line, col },
+              "unexpected closing quote",
             )
           } else {
             guard stack.pop() is Some(open) else { continue }
-            add_pair(pairs, "dquote", open, line, col, verbose)
+            add_pair(pairs, "dquote", open, { line, col }, verbose)
           }
           state = Normal
           i += 1
@@ -273,11 +267,14 @@ pub fn be_balance(
         if c == '\'' {
           if stack.length() == 0 || stack[stack.length() - 1].kind != "squote" {
             add_mismatch(
-              mismatches, "squote", line, col, "unexpected closing quote",
+              mismatches,
+              "squote",
+              { line, col },
+              "unexpected closing quote",
             )
           } else {
             guard stack.pop() is Some(open) else { continue }
-            add_pair(pairs, "squote", open, line, col, verbose)
+            add_pair(pairs, "squote", open, { line, col }, verbose)
           }
           state = Normal
           i += 1
@@ -375,8 +372,7 @@ pub fn be_balance(
               add_mismatch(
                 mismatches,
                 "tag",
-                tag_start_line,
-                tag_start_col,
+                { line: tag_start_line, col: tag_start_col },
                 "unexpected closing tag </\{tag_name}>",
               )
             } else {
@@ -385,13 +381,12 @@ pub fn be_balance(
                 add_mismatch(
                   mismatches,
                   "tag",
-                  tag_start_line,
-                  tag_start_col,
+                  { line: tag_start_line, col: tag_start_col },
                   "tag mismatch: expected </\{top.name}> but found </\{tag_name}>",
                 )
               } else {
                 guard stack.pop() is Some(open) else { continue }
-                add_pair(pairs, "tag", open, line, col, verbose)
+                add_pair(pairs, "tag", open, { line, col }, verbose)
               }
             }
           } else {
@@ -432,8 +427,7 @@ pub fn be_balance(
         add_mismatch(
           mismatches,
           "tag",
-          tag_start_line,
-          tag_start_col,
+          { line: tag_start_line, col: tag_start_col },
           "unclosed tag <\{tag_name}>",
         )
       }
@@ -443,8 +437,7 @@ pub fn be_balance(
     add_mismatch(
       mismatches,
       open.kind,
-      open.line,
-      open.col,
+      { line: open.line, col: open.col },
       "unclosed \{open.kind}",
     )
   }

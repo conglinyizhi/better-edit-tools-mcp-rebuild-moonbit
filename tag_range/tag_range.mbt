@@ -1,10 +1,8 @@
 ///|
 /// 定位 XML/HTML/Vue 标签配对范围的结果。
 pub(all) struct BeTagRangeResult {
-  start_line : Int
-  end_line : Int
   tag : String
-  content : String
+  range : @common.BeRange
 } derive(Debug, ToJson)
 
 ///|
@@ -135,7 +133,7 @@ pub fn be_tag_range(
   line_of_pos.push(cur)
   let mut pos = 0
   let stack : Array[OpenTag] = []
-  let mut best : BeTagRangeResult? = None
+  let mut best : (Int, Int, String)? = None
   while pos < n {
     if normalized[pos] != '<' {
       pos += 1
@@ -187,15 +185,10 @@ pub fn be_tag_range(
                     let width = end_line - start_line
                     let better = match best {
                       None => true
-                      Some(b) => width < b.end_line - b.start_line
+                      Some(b) => width < b.1 - b.0
                     }
                     if better {
-                      best = Some({
-                        start_line,
-                        end_line,
-                        tag: name,
-                        content: "",
-                      })
+                      best = Some((start_line, end_line, name))
                     }
                   }
                   pos = e + 1
@@ -239,14 +232,12 @@ pub fn be_tag_range(
     }
   }
   match best {
-    Some(b) => {
-      let start_line = b.start_line
-      let end_line = b.end_line
+    Some((start_line, end_line, tag)) => {
       let selected = []
       for i in (start_line - 1)..<end_line {
         selected.push(lines[i])
       }
-      { start_line, end_line, tag: b.tag, content: selected.join("\n") }
+      { tag, range: { start_line, end_line, content: selected.join("\n") } }
     }
     None =>
       raise @error.BeError::InvalidFormat(

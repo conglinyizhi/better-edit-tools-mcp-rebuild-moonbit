@@ -2,6 +2,7 @@
 package "conglinyizhi/better-edit-tools-mcp/read"
 
 import {
+  "conglinyizhi/better-edit-tools-mcp/common",
   "conglinyizhi/better-edit-tools-mcp/error",
   "moonbitlang/core/debug",
 }
@@ -13,11 +14,9 @@ pub fn be_read(String) -> BeReadResult raise @error.BeError
 
 // Types and methods
 pub(all) struct BeReadResult {
-  content : String
   viewed_code_id : String
-  start_line : Int
-  end_line : Int
-} derive(@debug.Debug)
+  range : @common.BeRange
+} derive(ToJson, @debug.Debug)
 
 // Type aliases
 

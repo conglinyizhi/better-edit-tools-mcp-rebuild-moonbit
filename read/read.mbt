@@ -1,11 +1,9 @@
 ///|
 /// be-read 结果
 pub(all) struct BeReadResult {
-  content : String
   viewed_code_id : String
-  start_line : Int
-  end_line : Int
-} derive(Debug)
+  range : @common.BeRange
+} derive(Debug, ToJson)
 
 ///|
 /// 按 "path:start-end" 格式读取文件指定行范围。
@@ -69,5 +67,5 @@ pub fn be_read(input : String) -> BeReadResult raise @error.BeError {
   let viewed_code_id = "\{path}:\{start_line}-\{effective_end}:\{content.hash()}"
     .hash()
     .to_string()
-  { content, viewed_code_id, start_line, end_line: effective_end }
+  { viewed_code_id, range: { start_line, end_line: effective_end, content } }
 }

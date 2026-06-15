@@ -2,23 +2,19 @@
 package "conglinyizhi/better-edit-tools-mcp/func_range"
 
 import {
+  "conglinyizhi/better-edit-tools-mcp/common",
   "conglinyizhi/better-edit-tools-mcp/error",
-  "moonbitlang/core/debug",
 }
 
 // Values
-pub fn be_func_range(String, Int) -> BeFuncRangeResult raise @error.BeError
+pub fn be_func_range(String, Int) -> @common.BeRange raise @error.BeError
 
 // Errors
 
 // Types and methods
-pub(all) struct BeFuncRangeResult {
-  start_line : Int
-  end_line : Int
-  content : String
-} derive(ToJson, @debug.Debug)
 
 // Type aliases
+pub using @common {type BeRange as BeFuncRangeResult}
 
 // Traits
 

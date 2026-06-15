@@ -1,10 +1,6 @@
 ///|
 /// `be_func_range` 结果
-pub(all) struct BeFuncRangeResult {
-  start_line : Int
-  end_line : Int
-  content : String
-} derive(Debug, ToJson)
+pub type BeFuncRangeResult = @common.BeRange
 
 ///|
 priv struct Block {

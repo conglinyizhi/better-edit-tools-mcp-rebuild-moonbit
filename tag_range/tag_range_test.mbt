@@ -5,10 +5,12 @@ test "简单 HTML 中定位 div 标签" {
   @fs.write_string_to_file(tmp_file, content)
   let result = @tag_range.be_tag_range(tmp_file, 3)
   json_inspect(result, content={
-    "start_line": 3,
-    "end_line": 3,
     "tag": "div",
-    "content": "    <div>Hello</div>",
+    "range": {
+      "start_line": 3,
+      "end_line": 3,
+      "content": "    <div>Hello</div>",
+    },
   })
   @fs.remove_file(tmp_file)
 }
@@ -20,10 +22,12 @@ test "嵌套标签返回最内层标签" {
   @fs.write_string_to_file(tmp_file, content)
   let result = @tag_range.be_tag_range(tmp_file, 4)
   json_inspect(result, content={
-    "start_line": 3,
-    "end_line": 5,
     "tag": "inner",
-    "content": "    <inner>\n      target\n    </inner>",
+    "range": {
+      "start_line": 3,
+      "end_line": 5,
+      "content": "    <inner>\n      target\n    </inner>",
+    },
   })
   @fs.remove_file(tmp_file)
 }
@@ -35,10 +39,12 @@ test "自闭合标签不视为包含标签" {
   @fs.write_string_to_file(tmp_file, content)
   let result = @tag_range.be_tag_range(tmp_file, 4)
   json_inspect(result, content={
-    "start_line": 1,
-    "end_line": 5,
     "tag": "div",
-    "content": "<div>\n  <img src=\"x\" />\n  <br/>\n  text\n</div>",
+    "range": {
+      "start_line": 1,
+      "end_line": 5,
+      "content": "<div>\n  <img src=\"x\" />\n  <br/>\n  text\n</div>",
+    },
   })
   @fs.remove_file(tmp_file)
 }
@@ -50,10 +56,12 @@ test "忽略 HTML/XML 注释中的标签" {
   @fs.write_string_to_file(tmp_file, content)
   let result = @tag_range.be_tag_range(tmp_file, 2)
   json_inspect(result, content={
-    "start_line": 1,
-    "end_line": 4,
     "tag": "div",
-    "content": "<div>\n  <!-- <span>comment</span> -->\n  <p>real</p>\n</div>",
+    "range": {
+      "start_line": 1,
+      "end_line": 4,
+      "content": "<div>\n  <!-- <span>comment</span> -->\n  <p>real</p>\n</div>",
+    },
   })
   @fs.remove_file(tmp_file)
 }

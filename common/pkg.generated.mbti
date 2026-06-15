@@ -1,0 +1,27 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "conglinyizhi/better-edit-tools-mcp/common"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) struct BeLocation {
+  line : Int
+  col : Int
+} derive(ToJson, @debug.Debug)
+
+pub(all) struct BeRange {
+  start_line : Int
+  end_line : Int
+  content : String
+} derive(ToJson, @debug.Debug)
+
+// Type aliases
+
+// Traits
+
