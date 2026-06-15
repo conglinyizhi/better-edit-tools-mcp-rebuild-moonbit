@@ -1,0 +1,39 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "conglinyizhi/better-edit-tools-mcp/balance"
+
+import {
+  "conglinyizhi/better-edit-tools-mcp/error",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn be_balance(String, verbose? : Bool) -> BeBalanceResult raise @error.BeError
+
+// Errors
+
+// Types and methods
+pub(all) struct BeBalanceResult {
+  ok : Bool
+  pairs : Array[BePair]
+  mismatches : Array[BeMismatch]
+} derive(Show, ToJson, @debug.Debug)
+
+pub(all) struct BeMismatch {
+  kind : String
+  line : Int
+  col : Int
+  reason : String
+} derive(Show, ToJson, @debug.Debug)
+
+pub(all) struct BePair {
+  kind : String
+  open_line : Int
+  open_col : Int
+  close_line : Int
+  close_col : Int
+} derive(Show, ToJson, @debug.Debug)
+
+// Type aliases
+
+// Traits
+
