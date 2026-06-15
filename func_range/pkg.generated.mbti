@@ -1,0 +1,24 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "conglinyizhi/better-edit-tools-mcp/func_range"
+
+import {
+  "conglinyizhi/better-edit-tools-mcp/error",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn be_func_range(String, Int) -> BeFuncRangeResult raise @error.BeError
+
+// Errors
+
+// Types and methods
+pub(all) struct BeFuncRangeResult {
+  start_line : Int
+  end_line : Int
+  content : String
+} derive(Show, ToJson, @debug.Debug)
+
+// Type aliases
+
+// Traits
+
