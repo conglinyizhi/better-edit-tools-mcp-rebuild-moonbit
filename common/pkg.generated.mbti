@@ -6,6 +6,7 @@ import {
 }
 
 // Values
+pub fn compute_viewed_code_id(String, Int, Int, String) -> String
 
 // Errors
 

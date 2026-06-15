@@ -64,8 +64,8 @@ pub fn be_read(input : String) -> BeReadResult raise @error.BeError {
     selected.push(lines[i].to_owned().replace(old="\r", new=""))
   }
   let content = selected.join("\n")
-  let viewed_code_id = "\{path}:\{start_line}-\{effective_end}:\{content.hash()}"
-    .hash()
-    .to_string()
+  let viewed_code_id = @common.compute_viewed_code_id(
+    path, start_line, effective_end, content,
+  )
   { viewed_code_id, range: { start_line, end_line: effective_end, content } }
 }
