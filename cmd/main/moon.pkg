@@ -1,0 +1,7 @@
+// import {
+//   "conglinyizhi/better-edit-tools-mcp" @lib,
+// }
+
+options(
+  "is-main": true,
+)

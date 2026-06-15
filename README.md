@@ -1,2 +1,1 @@
-# better-edit-tools-mcp-rebuild-moonbit
-
+README.mbt.md
