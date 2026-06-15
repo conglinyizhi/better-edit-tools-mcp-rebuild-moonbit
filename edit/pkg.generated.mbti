@@ -10,6 +10,8 @@ pub fn be_delete(String, lines? : Array[Int], start? : Int, end? : Int, start_li
 
 pub fn be_insert(String, String, line? : Int, after_line? : Int) -> Unit raise @error.BeError
 
+pub fn be_replace(String, Int, Int, String, viewed_code_id? : String, old? : String, old_text? : String) -> Unit raise @error.BeError
+
 // Errors
 
 // Types and methods
