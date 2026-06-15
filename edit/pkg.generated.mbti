@@ -3,6 +3,7 @@ package "conglinyizhi/better-edit-tools-mcp/edit"
 
 import {
   "conglinyizhi/better-edit-tools-mcp/error",
+  "moonbitlang/core/debug",
 }
 
 // Values
@@ -10,11 +11,17 @@ pub fn be_delete(String, lines? : Array[Int], start? : Int, end? : Int, start_li
 
 pub fn be_insert(String, String, line? : Int, after_line? : Int) -> Unit raise @error.BeError
 
+pub fn be_insert_chip(String, line? : Int, from? : String) -> BeInsertChipResult raise @error.BeError
+
 pub fn be_replace(String, Int, Int, String, viewed_code_id? : String, old? : String, old_text? : String) -> Unit raise @error.BeError
 
 // Errors
 
 // Types and methods
+pub(all) enum BeInsertChipResult {
+  Inserted
+  ChipIds(Array[String])
+} derive(ToJson, @debug.Debug)
 
 // Type aliases
 
