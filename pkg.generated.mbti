@@ -14,6 +14,7 @@ pub fn be_write(String, String) -> Unit raise BeWriteError
 pub(all) suberror BeReadError {
   InvalidFormat(String)
   FileNotFound(String)
+  NotARegularFile(String)
   ReadError(String)
 }
 

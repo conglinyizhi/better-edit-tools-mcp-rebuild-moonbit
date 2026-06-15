@@ -16,6 +16,18 @@ test "be_read 读取 /tmp 下绝对路径文件的指定行范围" {
 }
 
 ///|
+test "be_read 能处理路径中包含冒号的文件" {
+  let tmp_file = "/tmp/be:read:test.txt"
+  let content = "第一行\n第二行\n第三行\n第四行"
+  @fs.write_string_to_file(tmp_file, content)
+  let result = @better-edit-tools-mcp.be_read("\{tmp_file}:2-3")
+  inspect(result.content, content="第二行\n第三行")
+  inspect(result.start_line, content="2")
+  inspect(result.end_line, content="3")
+  @fs.remove_file(tmp_file)
+}
+
+///|
 test "be_write 写入 /tmp 下绝对路径文件并把字面 \\n 转为换行" {
   let tmp_file = "/tmp/be-write-test-absolute.txt"
   let input = "第一行\\n第二行\\n第三行"

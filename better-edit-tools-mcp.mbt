@@ -7,6 +7,7 @@
 pub(all) suberror BeReadError {
   InvalidFormat(String)
   FileNotFound(String)
+  NotARegularFile(String)
   ReadError(String)
 }
 
@@ -58,6 +59,10 @@ pub fn be_read(input : String) -> BeReadResult raise BeReadError {
     )
   }
   guard @fs.path_exists(path) else { raise BeReadError::FileNotFound(path) }
+  let is_regular = @fs.is_file(path) catch {
+    IOError(msg) => raise BeReadError::ReadError(msg)
+  }
+  guard is_regular else { raise BeReadError::NotARegularFile(path) }
   let text = @fs.read_file_to_string(path) catch {
     IOError(msg) => raise BeReadError::ReadError(msg)
   }
