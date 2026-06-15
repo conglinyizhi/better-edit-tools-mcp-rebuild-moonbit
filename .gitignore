@@ -17,3 +17,4 @@ node_modules/
 _build
 target
 .claude/
+.worktrees/
