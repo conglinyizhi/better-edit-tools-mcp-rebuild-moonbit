@@ -6,6 +6,8 @@ import {
 }
 
 // Values
+pub fn be_delete(String, lines? : Array[Int], start? : Int, end? : Int, start_line? : Int, end_line? : Int) -> Unit raise @error.BeError
+
 pub fn be_insert(String, String, line? : Int, after_line? : Int) -> Unit raise @error.BeError
 
 // Errors
