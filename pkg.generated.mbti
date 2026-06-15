@@ -8,11 +8,17 @@ import {
 // Values
 pub fn be_read(String) -> BeReadResult raise BeReadError
 
+pub fn be_write(String, String) -> Unit raise BeWriteError
+
 // Errors
 pub(all) suberror BeReadError {
   InvalidFormat(String)
   FileNotFound(String)
   ReadError(String)
+}
+
+pub(all) suberror BeWriteError {
+  WriteError(String)
 }
 
 // Types and methods
