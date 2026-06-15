@@ -7,7 +7,7 @@ test "be_func_range 返回包含目标行的最内层 {} 块" {
     #|  return x
     #|}
   @fs.write_string_to_file(tmp, content)
-  let result = @func_range.be_func_range(tmp, 2)
+  let result = @check.be_func_range(tmp, 2)
   inspect(result.start_line, content="1")
   inspect(result.end_line, content="4")
   inspect(result.content, content="fn f() {\n  let x = 1\n  return x\n}")
@@ -24,7 +24,7 @@ test "be_func_range 嵌套块返回最内层块" {
     #|  }
     #|}
   @fs.write_string_to_file(tmp, content)
-  let result = @func_range.be_func_range(tmp, 3)
+  let result = @check.be_func_range(tmp, 3)
   inspect(result.start_line, content="2")
   inspect(result.end_line, content="4")
   inspect(result.content, content="  fn inner() {\n    let x = 1\n  }")
@@ -42,7 +42,7 @@ test "be_func_range 忽略字符串和注释中的花括号" {
     #|  let x = 1
     #|}
   @fs.write_string_to_file(tmp, content)
-  let result = @func_range.be_func_range(tmp, 5)
+  let result = @check.be_func_range(tmp, 5)
   inspect(result.start_line, content="1")
   inspect(result.end_line, content="6")
   inspect(
@@ -55,7 +55,7 @@ test "be_func_range 忽略字符串和注释中的花括号" {
 ///|
 test "be_func_range 文件不存在时返回 FileNotFound" {
   let tmp = "/tmp/be-func-range-missing.mbt"
-  try @func_range.be_func_range(tmp, 1) catch {
+  try @check.be_func_range(tmp, 1) catch {
     @error.BeError::FileNotFound(path) => inspect(path, content=tmp)
     _ => fail("期望 FileNotFound 错误")
   } noraise {
@@ -71,13 +71,13 @@ test "be_func_range 行号越界时返回 InvalidFormat" {
     #|  let x = 1
     #|}
   @fs.write_string_to_file(tmp, content)
-  try @func_range.be_func_range(tmp, 0) catch {
+  try @check.be_func_range(tmp, 0) catch {
     @error.BeError::InvalidFormat(_) => ()
     _ => fail("行号 0 应返回 InvalidFormat")
   } noraise {
     _ => fail("行号 0 应抛出错误")
   }
-  try @func_range.be_func_range(tmp, 10) catch {
+  try @check.be_func_range(tmp, 10) catch {
     @error.BeError::InvalidFormat(_) => ()
     _ => fail("行号 10 应返回 InvalidFormat")
   } noraise {
@@ -93,7 +93,7 @@ test "be_func_range 目标行不在任何 {} 块内时返回 InvalidFormat" {
     #|let x = 1
     #|let y = 2
   @fs.write_string_to_file(tmp, content)
-  try @func_range.be_func_range(tmp, 1) catch {
+  try @check.be_func_range(tmp, 1) catch {
     @error.BeError::InvalidFormat(_) => ()
     _ => fail("期望 InvalidFormat 错误")
   } noraise {

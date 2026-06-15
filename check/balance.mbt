@@ -20,7 +20,7 @@ pub(all) struct BeBalanceResult {
 } derive(Debug, ToJson)
 
 ///|
-priv enum State {
+priv enum BalanceState {
   Normal
   DoubleString
   SingleString
@@ -44,7 +44,7 @@ fn is_tag_name_start(c : UInt16) -> Bool {
 }
 
 ///|
-fn is_tag_name_char(c : UInt16) -> Bool {
+fn balance_is_tag_name_char(c : UInt16) -> Bool {
   is_tag_name_start(c) || (c >= '0' && c <= '9') || c == '-' || c == '.'
 }
 
@@ -110,7 +110,7 @@ pub fn be_balance(
   let mut i = 0
   let mut line = 1
   let mut col = 1
-  let mut state = Normal
+  let mut state = BalanceState::Normal
   let mut tag_name = ""
   let mut tag_is_closing = false
   let mut tag_start_line = 0
@@ -121,14 +121,14 @@ pub fn be_balance(
       Normal => {
         if c == '"' {
           stack.push({ kind: "dquote", name: "", line, col })
-          state = DoubleString
+          state = BalanceState::DoubleString
           i += 1
           col += 1
           continue
         }
         if c == '\'' {
           stack.push({ kind: "squote", name: "", line, col })
-          state = SingleString
+          state = BalanceState::SingleString
           i += 1
           col += 1
           continue
@@ -136,13 +136,13 @@ pub fn be_balance(
         if c == '/' && i + 1 < len {
           let c2 = text[i + 1]
           if c2 == '/' {
-            state = LineComment
+            state = BalanceState::LineComment
             i += 2
             col += 2
             continue
           }
           if c2 == '*' {
-            state = BlockComment
+            state = BalanceState::BlockComment
             i += 2
             col += 2
             continue
@@ -153,7 +153,7 @@ pub fn be_balance(
           text[i + 1] == '!' &&
           text[i + 2] == '-' &&
           text[i + 3] == '-' {
-          state = HtmlComment
+          state = BalanceState::HtmlComment
           i += 4
           col += 4
           continue
@@ -167,7 +167,7 @@ pub fn be_balance(
           }
           if j < len && is_tag_name_start(text[j]) {
             let name_start = j
-            while j < len && is_tag_name_char(text[j]) {
+            while j < len && balance_is_tag_name_char(text[j]) {
               j += 1
             }
             tag_name = text.sub(start=name_start, end=j).to_owned()
@@ -181,7 +181,7 @@ pub fn be_balance(
             }
             col += name_len
             i = j
-            state = InTag
+            state = BalanceState::InTag
             continue
           }
         }
@@ -236,7 +236,7 @@ pub fn be_balance(
             guard stack.pop() is Some(open) else { continue }
             add_pair(pairs, "dquote", open, { line, col }, verbose)
           }
-          state = Normal
+          state = BalanceState::Normal
           i += 1
           col += 1
           continue
@@ -276,7 +276,7 @@ pub fn be_balance(
             guard stack.pop() is Some(open) else { continue }
             add_pair(pairs, "squote", open, { line, col }, verbose)
           }
-          state = Normal
+          state = BalanceState::Normal
           i += 1
           col += 1
           continue
@@ -307,19 +307,19 @@ pub fn be_balance(
           }
           line += 1
           col = 1
-          state = Normal
+          state = BalanceState::Normal
         } else if c == '\n' {
           i += 1
           line += 1
           col = 1
-          state = Normal
+          state = BalanceState::Normal
         } else {
           i += 1
           col += 1
         }
       BlockComment =>
         if c == '*' && i + 1 < len && text[i + 1] == '/' {
-          state = Normal
+          state = BalanceState::Normal
           i += 2
           col += 2
         } else if c == '\r' {
@@ -340,7 +340,7 @@ pub fn be_balance(
         }
       HtmlComment =>
         if c == '-' && i + 2 < len && text[i + 1] == '-' && text[i + 2] == '>' {
-          state = Normal
+          state = BalanceState::Normal
           i += 3
           col += 3
         } else if c == '\r' {
@@ -361,7 +361,7 @@ pub fn be_balance(
         }
       InTag => {
         if c == '/' && i + 1 < len && text[i + 1] == '>' {
-          state = Normal
+          state = BalanceState::Normal
           i += 2
           col += 2
           continue
@@ -397,7 +397,7 @@ pub fn be_balance(
               col: tag_start_col,
             })
           }
-          state = Normal
+          state = BalanceState::Normal
           i += 1
           col += 1
           continue

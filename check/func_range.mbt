@@ -9,7 +9,7 @@ priv struct Block {
 }
 
 ///|
-priv enum State {
+priv enum FuncRangeState {
   Normal
   LineComment
   BlockComment
@@ -63,7 +63,7 @@ pub fn be_func_range(
 fn scan_blocks(lines : Array[StringView]) -> Array[Block] {
   let blocks : Array[Block] = []
   let stack : Array[Int] = []
-  let mut state = State::Normal
+  let mut state = FuncRangeState::Normal
   for i = 0; i < lines.length(); i = i + 1 {
     let chars = lines[i].to_owned().to_array()
     let mut j = 0
@@ -74,21 +74,21 @@ fn scan_blocks(lines : Array[StringView]) -> Array[Block] {
           if c == '/' && j + 1 < chars.length() {
             let next = chars[j + 1]
             if next == '/' {
-              state = State::LineComment
+              state = FuncRangeState::LineComment
               break
             } else if next == '*' {
-              state = State::BlockComment
+              state = FuncRangeState::BlockComment
               j = j + 2
               continue
             }
           }
           if c == '"' {
-            state = State::DQString
+            state = FuncRangeState::DQString
             j = j + 1
             continue
           }
           if c == '\'' {
-            state = State::SQString
+            state = FuncRangeState::SQString
             j = j + 1
             continue
           }
@@ -105,7 +105,7 @@ fn scan_blocks(lines : Array[StringView]) -> Array[Block] {
         LineComment => break
         BlockComment => {
           if c == '*' && j + 1 < chars.length() && chars[j + 1] == '/' {
-            state = State::Normal
+            state = FuncRangeState::Normal
             j = j + 2
             continue
           }
@@ -117,7 +117,7 @@ fn scan_blocks(lines : Array[StringView]) -> Array[Block] {
             continue
           }
           if c == '"' {
-            state = State::Normal
+            state = FuncRangeState::Normal
             j = j + 1
             continue
           }
@@ -129,7 +129,7 @@ fn scan_blocks(lines : Array[StringView]) -> Array[Block] {
             continue
           }
           if c == '\'' {
-            state = State::Normal
+            state = FuncRangeState::Normal
             j = j + 1
             continue
           }
@@ -137,8 +137,8 @@ fn scan_blocks(lines : Array[StringView]) -> Array[Block] {
         }
       }
     }
-    if state == State::LineComment {
-      state = State::Normal
+    if state == FuncRangeState::LineComment {
+      state = FuncRangeState::Normal
     }
   }
   blocks

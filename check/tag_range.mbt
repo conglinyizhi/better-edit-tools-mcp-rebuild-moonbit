@@ -12,7 +12,7 @@ priv struct OpenTag {
 }
 
 ///|
-fn is_tag_name_char(code : Int) -> Bool {
+fn tag_is_tag_name_char(code : Int) -> Bool {
   (code >= 97 && code <= 122) ||
   (code >= 65 && code <= 90) ||
   (code >= 48 && code <= 57) ||
@@ -74,7 +74,7 @@ fn find_tag_end(s : String, start : Int) -> Int? {
 fn parse_tag_name(s : String, start : Int) -> (String, Int)? {
   let n = s.length()
   let mut i = start
-  while i < n && is_tag_name_char(s[i].to_int()) {
+  while i < n && tag_is_tag_name_char(s[i].to_int()) {
     i += 1
   }
   if i == start {

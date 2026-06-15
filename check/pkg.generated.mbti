@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "conglinyizhi/better-edit-tools-mcp/balance"
+package "conglinyizhi/better-edit-tools-mcp/check"
 
 import {
   "conglinyizhi/better-edit-tools-mcp/common",
@@ -9,6 +9,10 @@ import {
 
 // Values
 pub fn be_balance(String, verbose? : Bool) -> BeBalanceResult raise @error.BeError
+
+pub fn be_func_range(String, Int) -> @common.BeRange raise @error.BeError
+
+pub fn be_tag_range(String, Int) -> BeTagRangeResult raise @error.BeError
 
 // Errors
 
@@ -31,7 +35,13 @@ pub(all) struct BePair {
   close : @common.BeLocation
 } derive(ToJson, @debug.Debug)
 
+pub(all) struct BeTagRangeResult {
+  tag : String
+  range : @common.BeRange
+} derive(ToJson, @debug.Debug)
+
 // Type aliases
+pub using @common {type BeRange as BeFuncRangeResult}
 
 // Traits
 
