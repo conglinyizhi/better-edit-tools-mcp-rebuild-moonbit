@@ -1,0 +1,49 @@
+#!/bin/bash
+set -e
+
+echo "🌙 Running MoonBit pre-commit checks..."
+
+# 检查 moon 命令是否存在
+if ! command -v moon &> /dev/null; then
+  echo "❌ Error: 'moon' 命令未找到，请先安装 MoonBit 工具链。"
+  echo "   访问: https://www.moonbitlang.com/download/"
+  exit 1
+fi
+
+# 获取已暂存的 MoonBit 文件
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(mbt|mbti)$' || true)
+
+if [ -z "$STAGED_FILES" ]; then
+  echo "ℹ️  没有暂存的 MoonBit 文件，跳过检查。"
+  exit 0
+fi
+
+echo "📁 发现已暂存的 MoonBit 文件："
+echo "$STAGED_FILES" | sed 's/^/   - /'
+echo ""
+
+# 格式化
+echo "🎨 运行 moon fmt..."
+if ! moon fmt; then
+  echo "❌ 格式化失败！"
+  exit 1
+fi
+
+# 生成接口文件
+echo "📋 运行 moon info..."
+if ! moon info; then
+  echo "❌ 接口生成失败！"
+  exit 1
+fi
+
+# 检查是否有文件被修改
+CHANGED_FILES=$(git diff --name-only | grep -E '\.(mbt|mbti)$' || true)
+if [ -n "$CHANGED_FILES" ]; then
+  echo "⚠️  以下文件被格式化或接口生成修改，请检查并重新暂存："
+  echo "$CHANGED_FILES" | sed 's/^/   - /'
+  echo ""
+  echo "💡 运行: git add <修改的文件> && git commit"
+  exit 1
+fi
+
+echo "✅ 所有检查通过！继续提交..."
