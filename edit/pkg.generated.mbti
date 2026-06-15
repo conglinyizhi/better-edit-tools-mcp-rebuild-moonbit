@@ -1,11 +1,21 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "conglinyizhi/better-edit-tools-mcp/edit"
 
+import {
+  "conglinyizhi/better-edit-tools-mcp/error",
+  "moonbitlang/core/debug",
+}
+
 // Values
+pub fn be_insert_chip(String, line? : Int, from? : String) -> BeInsertChipResult raise @error.BeError
 
 // Errors
 
 // Types and methods
+pub(all) enum BeInsertChipResult {
+  Inserted
+  ChipIds(Array[String])
+} derive(ToJson, @debug.Debug)
 
 // Type aliases
 
