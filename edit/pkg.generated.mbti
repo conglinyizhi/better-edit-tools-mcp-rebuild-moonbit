@@ -1,7 +1,12 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "conglinyizhi/better-edit-tools-mcp/edit"
 
+import {
+  "conglinyizhi/better-edit-tools-mcp/error",
+}
+
 // Values
+pub fn be_replace(String, Int, Int, String, viewed_code_id? : String, old? : String, old_text? : String) -> Unit raise @error.BeError
 
 // Errors
 
