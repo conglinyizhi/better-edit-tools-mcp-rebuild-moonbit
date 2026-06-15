@@ -2,52 +2,86 @@
 
 This is a [MoonBit](https://docs.moonbitlang.com) project.
 
-You can browse and install extra skills here:
+Browse and install extra skills here:
 <https://github.com/moonbitlang/skills>
 
 ## Project Structure
 
-- MoonBit packages are organized per directory; each directory contains a
-  `moon.pkg` file listing its dependencies. Each package has its files and
-  blackbox test files (ending in `_test.mbt`) and whitebox test files (ending in
-  `_wbtest.mbt`).
+- `moon.mod` at the module root lists module metadata.
 
-- In the toplevel directory, there is a `moon.mod` file listing module
-  metadata.
+- Each directory with a `moon.pkg` file is a package. A package is the
+  compilation unit; all `.mbt` files in the same package share scope.
 
-## Coding convention
+- Tools are grouped by responsibility:
 
-- MoonBit code is organized in block style, each block is separated by `///|`,
-  the order of each block is irrelevant. In some refactorings, you can process
-  block by block independently.
+  ```
+  better-edit-tools-mcp/
+  ├── cmd/main/        # CLI / MCP server entry
+  ├── error/           # Shared BeError type
+  ├── read/            # be-read and range detection tools
+  ├── write/           # be-write and full-file write tools
+  ├── edit/            # Incremental editing tools (insert/delete/replace/chip)
+  └── check/           # Structural checks (balance)
+  ```
 
-- Try to keep deprecated blocks in file called `deprecated.mbt` in each
-  directory.
+- Each package contains `.mbt` source files, black-box tests (`_test.mbt`),
+  and white-box tests (`_wbtest.mbt`).
+
+- Cross-cutting types (e.g. errors) live in the `error/` package.
+
+## Coding Conventions
+
+- MoonBit code is organized in blocks separated by `///|`. Block order is
+  irrelevant; refactor block by block when possible.
+
+- Keep deprecated blocks in `deprecated.mbt` inside each package.
+
+- Use the shared `BeError` from `error/` for all tool errors. Extend it with
+  new variants instead of introducing per-package suberrors.
+
+## Testing
+
+- Run `moon test` to execute tests; run `moon test --update` to refresh
+  snapshots after intentional output changes.
+
+- Black-box tests call only public APIs; white-box tests validate internal
+  helpers.
+
+- File I/O tests may use temporary files under `/tmp/` with absolute paths.
+  Clean them up after each test.
+
+- Prefer `assert_eq` or `assert_true(pattern is Pattern(...))` for stable
+  results. For snapshot tests, derive `Debug` and use `debug_inspect` instead
+  of deriving `Show`.
+
+- Use `moon coverage analyze > uncovered.log` to inspect test coverage.
 
 ## Tooling
 
-- `moon fmt` is used to format your code properly.
+- Format code with `moon fmt`.
 
-- `moon ide` provides project navigation helpers like `peek-def`, `outline`, and
-  `find-references`. See $moonbit-agent-guide for details.
+- Use `moon ide` for navigation: `peek-def`, `outline`, `find-references`.
+  See `$moonbit-agent-guide` for details.
 
-- `moon info` is used to update the generated interface of the package, each
-  package has a generated interface file `.mbti`, it is a brief formal
-  description of the package. If nothing in `.mbti` changes, this means your
-  change does not bring the visible changes to the external package users, it is
-  typically a safe refactoring.
+- Run `moon info` to generate `.mbti` interface files. They summarize the
+  public API surface. If `.mbti` files do not change, your change likely does
+  not affect external consumers and is a safe refactoring.
 
-- In the last step, run `moon info && moon fmt` to update the interface and
-  format the code. Check the diffs of `.mbti` file to see if the changes are
-  expected.
+- Before committing, run:`moon fmt && moon info`
 
-- Run `moon test` to check tests pass. MoonBit supports snapshot testing; when
-  changes affect outputs, run `moon test --update` to refresh snapshots.
+  Review `.mbti` diffs to confirm public API changes are intentional.
 
-- Prefer `assert_eq` or `assert_true(pattern is Pattern(...))` for results that
-  are stable or very unlikely to change. For snapshot tests that record
-  structured debugging output, derive `Debug` and use `debug_inspect`, rather
-  than deriving `Show` for debugging. For solid, well-defined results (e.g.
-  scientific computations), prefer assertion tests. You can use
-  `moon coverage analyze > uncovered.log` to see which parts of your code are
-  not covered by tests.
+## Git Hooks
+
+- The `pre-commit` hook in `.githooks/pre-commit` runs `moon fmt && moon info`
+  before each commit.
+
+- Enable hooks after cloning:
+
+  ```bash
+  ./.githooks/setup.sh
+  ```
+
+- If the hook modifies `.mbt` or `.mbti` files, the commit is blocked. Review
+  the changes, stage them, and commit again. See `.githooks/README.md` for
+  details.
