@@ -1,0 +1,25 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "conglinyizhi/better-edit-tools-mcp/tag_range"
+
+import {
+  "conglinyizhi/better-edit-tools-mcp/error",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn be_tag_range(String, Int) -> BeTagRangeResult raise @error.BeError
+
+// Errors
+
+// Types and methods
+pub(all) struct BeTagRangeResult {
+  start_line : Int
+  end_line : Int
+  tag : String
+  content : String
+} derive(Show, ToJson, @debug.Debug)
+
+// Type aliases
+
+// Traits
+
