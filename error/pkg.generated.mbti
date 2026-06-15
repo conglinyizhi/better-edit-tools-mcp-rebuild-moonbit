@@ -1,0 +1,20 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "conglinyizhi/better-edit-tools-mcp/error"
+
+// Values
+
+// Errors
+pub(all) suberror BeError {
+  InvalidFormat(String)
+  FileNotFound(String)
+  NotARegularFile(String)
+  ReadError(String)
+  WriteError(String)
+}
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

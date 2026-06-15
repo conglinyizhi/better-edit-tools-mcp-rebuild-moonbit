@@ -1,13 +1,14 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "conglinyizhi/better-edit-tools-mcp/write"
 
+import {
+  "conglinyizhi/better-edit-tools-mcp/error",
+}
+
 // Values
-pub fn be_write(String, String) -> Unit raise BeWriteError
+pub fn be_write(String, String) -> Unit raise @error.BeError
 
 // Errors
-pub(all) suberror BeWriteError {
-  WriteError(String)
-}
 
 // Types and methods
 
