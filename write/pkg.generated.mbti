@@ -1,0 +1,17 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "conglinyizhi/better-edit-tools-mcp/write"
+
+// Values
+pub fn be_write(String, String) -> Unit raise BeWriteError
+
+// Errors
+pub(all) suberror BeWriteError {
+  WriteError(String)
+}
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

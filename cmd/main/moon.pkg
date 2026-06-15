@@ -1,6 +1,7 @@
-// import {
-//   "conglinyizhi/better-edit-tools-mcp" @lib,
-// }
+import {
+  "conglinyizhi/better-edit-tools-mcp/read",
+  "conglinyizhi/better-edit-tools-mcp/write",
+}
 
 options(
   "is-main": true,
