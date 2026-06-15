@@ -1,0 +1,29 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "conglinyizhi/better-edit-tools-mcp"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn be_read(String) -> BeReadResult raise BeReadError
+
+// Errors
+pub(all) suberror BeReadError {
+  InvalidFormat(String)
+  FileNotFound(String)
+  ReadError(String)
+}
+
+// Types and methods
+pub(all) struct BeReadResult {
+  content : String
+  viewed_code_id : String
+  start_line : Int
+  end_line : Int
+} derive(@debug.Debug)
+
+// Type aliases
+
+// Traits
+
