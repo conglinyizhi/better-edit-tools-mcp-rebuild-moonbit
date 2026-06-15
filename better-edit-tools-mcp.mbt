@@ -1,3 +1,3 @@
-// Main package file for your library code.
-// Put public APIs and shared helpers here.
-// Keep blocks small and focused for easy refactors.
+// 库代码的主包文件。
+// 将公共 API 和共享辅助函数放在这里。
+// 保持代码块小巧专注，便于重构。

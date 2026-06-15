@@ -1,10 +1,10 @@
-// Learn more about moon.mod configuration:
+// 了解更多 moon.mod 配置信息：
 // https://docs.moonbitlang.com/en/latest/toolchain/moon/module.html
 //
-// To add a dependency, run this command in your terminal:
+// 添加依赖请运行：
 //   moon add moonbitlang/x
 //
-// Or manually declare it in `import`, for example:
+// 或在 `import` 中手动声明，例如：
 // import {
 //   "moonbitlang/x@0.4.6",
 // }

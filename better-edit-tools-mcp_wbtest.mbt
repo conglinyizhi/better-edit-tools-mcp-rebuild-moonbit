@@ -1,3 +1,3 @@
-// Whitebox tests run within the package scope.
-// Use them to validate internal helpers or invariants.
-// Keep them focused; public behavior belongs in `_test.mbt`.
+// 白盒测试在包作用域内运行。
+// 用于验证内部辅助函数或不变量。
+// 保持聚焦；公共行为请写在 `_test.mbt` 中。
