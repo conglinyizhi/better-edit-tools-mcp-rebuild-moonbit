@@ -1,4 +1,6 @@
 import {
   "conglinyizhi/better-edit-tools-mcp/error",
+  "moonbitlang/core/env",
   "moonbitlang/core/random",
+  "moonbitlang/x/fs",
 }

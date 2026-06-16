@@ -1,5 +1,61 @@
 ///|
-let store : Ref[Map[String, String]] = { val: {} }
+fn cache_dir() -> String {
+  match @env.get_env_var("LOCALAPPDATA") {
+    Some(dir) => dir + "/better-edit-tools-mcp/chips"
+    None =>
+      match @env.get_env_var("HOME") {
+        Some(home) =>
+          match @env.get_env_var("XDG_CACHE_HOME") {
+            Some(xdg) => xdg + "/better-edit-tools-mcp/chips"
+            None => home + "/.cache/better-edit-tools-mcp/chips"
+          }
+        None => "/tmp/better-edit-tools-mcp-chips"
+      }
+  }
+}
+
+///|
+fn ensure_cache_dir() -> Unit raise @error.BeError {
+  let dir = cache_dir()
+  if !@fs.path_exists(dir) {
+    ensure_dir_all(dir)
+  }
+}
+
+///|
+fn ensure_dir_all(path : String) -> Unit raise @error.BeError {
+  if @fs.path_exists(path) {
+    return
+  }
+  let parts = path.split("/").to_array()
+  let mut current = ""
+  for i, part in parts {
+    let p = part.to_owned()
+    if p == "" {
+      if i == 0 {
+        current = "/"
+      }
+      continue
+    }
+    if current == "" {
+      current = p
+    } else if current == "/" {
+      current = "/" + p
+    } else {
+      current = current + "/" + p
+    }
+    if !@fs.path_exists(current) {
+      @fs.create_dir(current) catch {
+        IOError(msg) => raise @error.BeError::WriteError(msg)
+      }
+    }
+  }
+}
+
+///|
+fn chip_path(id : String) -> String {
+  cache_dir() + "/" + id
+}
 
 ///|
 fn pad_hex(hex : String, len : Int) -> String {
@@ -45,28 +101,46 @@ fn generate_chip_id() -> String {
 }
 
 ///|
-/// 将 content 保存到内存中的 chip 缓存，返回分配的 chip id。
-pub fn save(content : String) -> String {
+/// 将 content 保存到 chip 缓存，返回分配的 chip id。
+pub fn save(content : String) -> String raise @error.BeError {
+  ensure_cache_dir()
   let id = generate_chip_id()
-  store.val[id] = content
+  let path = chip_path(id)
+  @fs.write_string_to_file(path, content) catch {
+    IOError(msg) => raise @error.BeError::WriteError(msg)
+  }
   id
 }
 
 ///|
 /// 根据 id 读取 chip 内容，不存在时返回 FileNotFound 错误。
 pub fn read(id : String) -> String raise @error.BeError {
-  match store.val.get(id) {
-    Some(content) => content
-    None => raise @error.BeError::FileNotFound(id)
+  let path = chip_path(id)
+  guard @fs.path_exists(path) else { raise @error.BeError::FileNotFound(path) }
+  @fs.read_file_to_string(path) catch {
+    IOError(msg) => raise @error.BeError::ReadError(msg)
   }
 }
 
 ///|
 /// 返回所有已保存的 chip id，按字典序排列。
-pub fn list() -> Array[String] {
+pub fn list() -> Array[String] raise @error.BeError {
+  let dir = cache_dir()
+  if !@fs.path_exists(dir) {
+    return []
+  }
+  let entries = @fs.read_dir(dir) catch {
+    IOError(msg) => raise @error.BeError::ReadError(msg)
+  }
   let ids = []
-  for k, _ in store.val {
-    ids.push(k)
+  for entry in entries {
+    let path = dir + "/" + entry
+    let is_regular = @fs.is_file(path) catch {
+      IOError(msg) => raise @error.BeError::ReadError(msg)
+    }
+    if is_regular {
+      ids.push(entry)
+    }
   }
   ids.sort()
   ids
@@ -75,11 +149,33 @@ pub fn list() -> Array[String] {
 ///|
 /// 删除指定 chip。
 pub fn remove(id : String) -> Unit {
-  store.val.remove(id)
+  let path = chip_path(id)
+  if @fs.path_exists(path) {
+    @fs.remove_file(path) catch {
+      _ => ()
+    }
+  }
 }
 
 ///|
 /// 清空所有 chip。
-pub fn clear() -> Unit {
-  store.val = {}
+pub fn clear() -> Unit raise @error.BeError {
+  let dir = cache_dir()
+  if !@fs.path_exists(dir) {
+    return
+  }
+  let entries = @fs.read_dir(dir) catch {
+    IOError(msg) => raise @error.BeError::ReadError(msg)
+  }
+  for entry in entries {
+    let path = dir + "/" + entry
+    let is_regular = @fs.is_file(path) catch {
+      IOError(msg) => raise @error.BeError::ReadError(msg)
+    }
+    if is_regular {
+      @fs.remove_file(path) catch {
+        IOError(msg) => raise @error.BeError::WriteError(msg)
+      }
+    }
+  }
 }

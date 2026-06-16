@@ -6,15 +6,15 @@ import {
 }
 
 // Values
-pub fn clear() -> Unit
+pub fn clear() -> Unit raise @error.BeError
 
-pub fn list() -> Array[String]
+pub fn list() -> Array[String] raise @error.BeError
 
 pub fn read(String) -> String raise @error.BeError
 
 pub fn remove(String) -> Unit
 
-pub fn save(String) -> String
+pub fn save(String) -> String raise @error.BeError
 
 // Errors
 
