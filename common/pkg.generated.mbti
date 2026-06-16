@@ -2,11 +2,14 @@
 package "conglinyizhi/better-edit-tools-mcp/common"
 
 import {
+  "conglinyizhi/better-edit-tools-mcp/error",
   "moonbitlang/core/debug",
 }
 
 // Values
 pub fn compute_viewed_code_id(String, Int, Int, String) -> String
+
+pub fn reject_chip_target(String) -> Unit raise @error.BeError
 
 // Errors
 

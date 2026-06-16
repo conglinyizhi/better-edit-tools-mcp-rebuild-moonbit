@@ -40,3 +40,16 @@ test "be_write 支持使用 chip://id 作为参数写入文件" {
   }
   @chip.remove(chip_id)
 }
+
+///|
+test "be_write 拒绝 chip:// 作为目标文件" {
+  try {
+    let _ = @write.be_write("chip://some-id", "content")
+    (fail("expected InvalidFormat error") : Unit)
+  } catch {
+    @error.BeError::InvalidFormat(_) => ()
+    _ => (fail("expected InvalidFormat error") : Unit)
+  } noraise {
+    _ => (fail("expected error to be raised") : Unit)
+  }
+}

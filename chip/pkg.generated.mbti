@@ -14,6 +14,8 @@ pub fn read(String) -> String raise @error.BeError
 
 pub fn remove(String) -> Unit
 
+pub fn resolve(String) -> String raise @error.BeError
+
 pub fn save(String) -> String raise @error.BeError
 
 // Errors

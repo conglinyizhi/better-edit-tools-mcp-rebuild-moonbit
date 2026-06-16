@@ -23,3 +23,11 @@ pub fn compute_viewed_code_id(
 ) -> String {
   "\{path}:\{start_line}-\{end_line}:\{content.hash()}".hash().to_string()
 }
+
+///|
+/// 校验 file 参数不是 chip://{id}。chip 只能作为内容来源，不能作为目标文件。
+pub fn reject_chip_target(file : String) -> Unit raise @error.BeError {
+  if file.has_prefix("chip://") {
+    raise @error.BeError::InvalidFormat("file 参数不能是 chip://{id}")
+  }
+}

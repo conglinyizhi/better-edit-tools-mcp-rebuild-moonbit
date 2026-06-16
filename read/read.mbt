@@ -17,6 +17,7 @@ pub fn be_read(input : String) -> BeReadResult raise @error.BeError {
     )
   }
   let path = input.sub(start=0, end=idx).to_owned()
+  @common.reject_chip_target(path)
   let range = input.sub(start=idx + 1, end=input.length()).to_owned()
   let dash = range.find("-")
   guard dash is Some(dash_idx) else {

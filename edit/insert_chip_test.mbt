@@ -105,3 +105,16 @@ test "file not found for target" {
     _ => (fail("expected error to be raised") : Unit)
   }
 }
+
+///|
+test "be_insert_chip 拒绝 chip:// 作为目标文件" {
+  try {
+    let _ = @edit.be_insert_chip("chip://some-id", from="file:///tmp/x.txt")
+    (fail("expected InvalidFormat error") : Unit)
+  } catch {
+    @error.BeError::InvalidFormat(_) => ()
+    _ => (fail("expected InvalidFormat error") : Unit)
+  } noraise {
+    _ => (fail("expected error to be raised") : Unit)
+  }
+}

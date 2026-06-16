@@ -99,3 +99,29 @@ test "be_replace 文件不存在" {
     _ => fail("expected error")
   }
 }
+
+///|
+test "be_replace 支持 chip://id 作为 content" {
+  @chip.clear()
+  let tmp_file = "/tmp/be-replace-test-chip-content.txt"
+  @fs.write_string_to_file(tmp_file, "第一行\n第二行\n第三行")
+  let chip_id = @chip.save("来自 chip 的内容")
+  @edit.be_replace(tmp_file, 2, 2, "chip://" + chip_id)
+  let text = @fs.read_file_to_string(tmp_file)
+  inspect(text, content="第一行\n来自 chip 的内容\n第三行")
+  @fs.remove_file(tmp_file)
+  @chip.remove(chip_id)
+}
+
+///|
+test "be_replace 拒绝 chip:// 作为目标文件" {
+  try {
+    let _ = @edit.be_replace("chip://some-id", 1, 1, "X")
+    (fail("expected InvalidFormat error") : Unit)
+  } catch {
+    @error.BeError::InvalidFormat(_) => ()
+    _ => (fail("expected InvalidFormat error") : Unit)
+  } noraise {
+    _ => (fail("expected error to be raised") : Unit)
+  }
+}

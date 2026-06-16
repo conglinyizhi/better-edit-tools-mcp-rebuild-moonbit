@@ -81,3 +81,16 @@ test "file not found" {
     _ => fail("expected error to be raised")
   }
 }
+
+///|
+test "be_delete 拒绝 chip:// 作为目标文件" {
+  try {
+    let _ = @edit.be_delete("chip://some-id", lines=[1])
+    (fail("expected InvalidFormat error") : Unit)
+  } catch {
+    @error.BeError::InvalidFormat(_) => ()
+    _ => (fail("expected InvalidFormat error") : Unit)
+  } noraise {
+    _ => (fail("expected error to be raised") : Unit)
+  }
+}

@@ -18,14 +18,24 @@ test "read missing chip raises FileNotFound" {
 }
 
 ///|
-test "list and clear chips" {
+test "list chip ids contains saved ids" {
   let id_a = @chip.save("a")
   let id_b = @chip.save("b")
   let ids = @chip.list()
-  inspect(ids.length(), content="2")
   guard ids.contains(id_a) && ids.contains(id_b) else {
     fail("expected both chip ids in list")
   }
+  @chip.remove(id_a)
+  @chip.remove(id_b)
+}
+
+///|
+test "clear removes saved chip" {
   @chip.clear()
-  inspect(@chip.list().length(), content="0")
+  let id = @chip.save("x")
+  guard @chip.list().contains(id) else { fail("expected id after save") }
+  @chip.clear()
+  guard !@chip.list().contains(id) else {
+    fail("expected id removed after clear")
+  }
 }

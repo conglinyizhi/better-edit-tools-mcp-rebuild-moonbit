@@ -70,3 +70,29 @@ test "be_insert 文件不存在时报 FileNotFound" {
     _ => fail("期望函数抛出错误")
   }
 }
+
+///|
+test "be_insert 支持 chip://id 作为 content" {
+  @chip.clear()
+  let tmp = "/tmp/be-insert-chip-content.txt"
+  @fs.write_string_to_file(tmp, "第一行\n第二行")
+  let chip_id = @chip.save("来自 chip 的内容")
+  @edit.be_insert(tmp, "chip://" + chip_id, line=1)
+  let text = @fs.read_file_to_string(tmp)
+  inspect(text, content="第一行\n来自 chip 的内容\n第二行")
+  @fs.remove_file(tmp)
+  @chip.remove(chip_id)
+}
+
+///|
+test "be_insert 拒绝 chip:// 作为目标文件" {
+  try {
+    let _ = @edit.be_insert("chip://some-id", "content", line=1)
+    (fail("expected InvalidFormat error") : Unit)
+  } catch {
+    @error.BeError::InvalidFormat(_) => ()
+    _ => (fail("expected InvalidFormat error") : Unit)
+  } noraise {
+    _ => (fail("expected error to be raised") : Unit)
+  }
+}

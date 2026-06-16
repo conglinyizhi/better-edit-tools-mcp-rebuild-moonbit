@@ -22,3 +22,16 @@ test "be_read 能处理路径中包含冒号的文件" {
   inspect(result.range.end_line, content="3")
   @fs.remove_file(tmp_file)
 }
+
+///|
+test "be_read 拒绝 chip:// 作为目标文件" {
+  try {
+    let _ = @read.be_read("chip://some-id:1-2")
+    (fail("expected InvalidFormat error") : Unit)
+  } catch {
+    @error.BeError::InvalidFormat(_) => ()
+    _ => (fail("expected InvalidFormat error") : Unit)
+  } noraise {
+    _ => (fail("expected error to be raised") : Unit)
+  }
+}

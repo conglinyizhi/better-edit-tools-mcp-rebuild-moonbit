@@ -10,6 +10,7 @@ pub fn be_delete(
   start_line? : Int = 0,
   end_line? : Int = 0,
 ) -> Unit raise @error.BeError {
+  @common.reject_chip_target(file)
   guard @fs.path_exists(file) else { raise @error.BeError::FileNotFound(file) }
   let is_regular = @fs.is_file(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)

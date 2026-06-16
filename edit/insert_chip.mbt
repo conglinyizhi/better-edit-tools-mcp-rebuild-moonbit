@@ -34,6 +34,7 @@ pub fn be_insert_chip(
   line? : Int = 0,
   from? : String = "",
 ) -> BeInsertChipResult raise @error.BeError {
+  @common.reject_chip_target(file)
   if from == "" {
     return ChipIds(@chip.list())
   }

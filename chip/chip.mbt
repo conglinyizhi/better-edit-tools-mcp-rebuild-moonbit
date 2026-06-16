@@ -113,6 +113,19 @@ pub fn save(content : String) -> String raise @error.BeError {
 }
 
 ///|
+/// 如果 source 以 `chip://` 开头，则读取对应 chip 内容；否则原样返回。
+/// 兼容 `chip://{id} 写入失败：...` 这类返回串，只取第一个空格前的 id。
+pub fn resolve(source : String) -> String raise @error.BeError {
+  guard source.has_prefix("chip://") else { return source }
+  let rest = source[7:].to_owned()
+  let id = match rest.find(" ") {
+    Some(idx) => rest[:idx].to_owned()
+    None => rest
+  }
+  read(id)
+}
+
+///|
 /// 根据 id 读取 chip 内容，不存在时返回 FileNotFound 错误。
 pub fn read(id : String) -> String raise @error.BeError {
   let path = chip_path(id)

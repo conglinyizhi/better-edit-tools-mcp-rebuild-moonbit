@@ -13,6 +13,7 @@ pub fn be_insert(
     raise @error.BeError::InvalidFormat("line 与 after_line 不一致")
   }
   let target = if line != 0 { line } else { after_line }
+  @common.reject_chip_target(file)
   guard @fs.path_exists(file) else { raise @error.BeError::FileNotFound(file) }
   let is_regular = @fs.is_file(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)
@@ -21,7 +22,8 @@ pub fn be_insert(
   let text = @fs.read_file_to_string(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
-  let normalized = content.replace_all(old="\\n", new="\n")
+  let resolved = @chip.resolve(content)
+  let normalized = resolved.replace_all(old="\\n", new="\n")
   let lines = if text.is_empty() {
     []
   } else {

@@ -12,6 +12,7 @@ pub fn be_replace(
   old_text? : String = "",
 ) -> Unit raise @error.BeError {
   // 验证文件并读取内容
+  @common.reject_chip_target(file)
   guard @fs.path_exists(file) else { raise @error.BeError::FileNotFound(file) }
   let is_regular = @fs.is_file(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)
@@ -56,7 +57,8 @@ pub fn be_replace(
   }
 
   // 规范化新内容并替换范围
-  let normalized = content.replace_all(old="\\n", new="\n")
+  let resolved = @chip.resolve(content)
+  let normalized = resolved.replace_all(old="\\n", new="\n")
   let new_lines = normalized.split("\n").to_array()
   let result = []
   for i in 0..<(start_line - 1) {
