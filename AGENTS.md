@@ -17,6 +17,7 @@ Browse and install extra skills here:
   ```
   better-edit-tools-mcp/
   ├── cmd/main/        # CLI / MCP server entry
+  ├── chip/            # In-memory chip cache shared across packages
   ├── error/           # Shared BeError type
   ├── read/            # be-read and range detection tools
   ├── write/           # be-write and full-file write tools

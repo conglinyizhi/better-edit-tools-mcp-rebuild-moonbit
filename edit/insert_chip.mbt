@@ -5,38 +5,6 @@ pub(all) enum BeInsertChipResult {
 } derive(Debug, ToJson)
 
 ///|
-let chip_dir : String = "/tmp/better-edit-tools-chips"
-
-///|
-fn ensure_chip_dir() -> Unit raise @error.BeError {
-  if !@fs.path_exists(chip_dir) {
-    @fs.create_dir(chip_dir) catch {
-      IOError(msg) => raise @error.BeError::WriteError(msg)
-    }
-  }
-}
-
-///|
-fn list_chip_ids() -> Array[String] raise @error.BeError {
-  ensure_chip_dir()
-  let entries = @fs.read_dir(chip_dir) catch {
-    IOError(msg) => raise @error.BeError::ReadError(msg)
-  }
-  let ids = []
-  for entry in entries {
-    let path = chip_dir + "/" + entry
-    let is_regular = @fs.is_file(path) catch {
-      IOError(msg) => raise @error.BeError::ReadError(msg)
-    }
-    if is_regular {
-      ids.push(entry)
-    }
-  }
-  ids.sort()
-  ids
-}
-
-///|
 fn read_chip_content(from : String) -> String raise @error.BeError {
   if from.has_prefix("file:///") {
     let path = from[8:].to_owned()
@@ -48,13 +16,7 @@ fn read_chip_content(from : String) -> String raise @error.BeError {
     }
   } else if from.has_prefix("chip://") {
     let id = from[7:].to_owned()
-    let path = chip_dir + "/" + id
-    guard @fs.path_exists(path) else {
-      raise @error.BeError::FileNotFound(path)
-    }
-    @fs.read_file_to_string(path) catch {
-      IOError(msg) => raise @error.BeError::ReadError(msg)
-    }
+    @chip.read(id)
   } else {
     raise @error.BeError::InvalidFormat(
       "from 格式应为 file:///path 或 chip://id",
@@ -73,7 +35,7 @@ pub fn be_insert_chip(
   from? : String = "",
 ) -> BeInsertChipResult raise @error.BeError {
   if from == "" {
-    return ChipIds(list_chip_ids())
+    return ChipIds(@chip.list())
   }
   guard @fs.path_exists(file) else { raise @error.BeError::FileNotFound(file) }
   let is_regular = @fs.is_file(file) catch {

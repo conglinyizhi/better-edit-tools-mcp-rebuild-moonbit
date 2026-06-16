@@ -6,7 +6,7 @@ import {
 }
 
 // Values
-pub fn be_write(String, String) -> Unit raise @error.BeError
+pub fn be_write(String, String) -> String raise @error.BeError
 
 // Errors
 

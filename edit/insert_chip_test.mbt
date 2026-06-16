@@ -14,44 +14,31 @@ test "insert from file:///tmp/..." {
 
 ///|
 test "insert from chip://id" {
+  @chip.clear()
   let target = "/tmp/be-insert-chip-target-002.txt"
-  let chip_id = "be-insert-chip-test-002"
-  let chip_path = "/tmp/better-edit-tools-chips/" + chip_id
   @fs.write_string_to_file(target, "alpha\nbeta")
-  if !@fs.path_exists("/tmp/better-edit-tools-chips") {
-    @fs.create_dir("/tmp/better-edit-tools-chips")
-  }
-  @fs.write_string_to_file(chip_path, "gamma")
+  let chip_id = @chip.save("gamma")
   let result = @edit.be_insert_chip(target, line=2, from="chip://" + chip_id)
   json_inspect(result, content="Inserted")
   let text = @fs.read_file_to_string(target)
   inspect(text, content="alpha\nbeta\ngamma")
   @fs.remove_file(target)
-  @fs.remove_file(chip_path)
+  @chip.remove(chip_id)
 }
 
 ///|
 test "list chip IDs when from is empty" {
-  let chip_dir = "/tmp/better-edit-tools-chips"
-  if !@fs.path_exists(chip_dir) {
-    @fs.create_dir(chip_dir)
-  }
-  let id_a = "be-insert-chip-list-a"
-  let id_b = "be-insert-chip-list-b"
-  let path_a = chip_dir + "/" + id_a
-  let path_b = chip_dir + "/" + id_b
-  @fs.write_string_to_file(path_a, "a")
-  @fs.write_string_to_file(path_b, "b")
+  @chip.clear()
+  let id_a = @chip.save("a")
+  let id_b = @chip.save("b")
   let result = @edit.be_insert_chip(
     "/tmp/be-insert-chip-dummy-target.txt",
     from="",
   )
-  json_inspect(result, content=[
-    "ChipIds",
-    ["be-insert-chip-list-a", "be-insert-chip-list-b"],
-  ])
-  @fs.remove_file(path_a)
-  @fs.remove_file(path_b)
+  guard result is ChipIds(ids) else { fail("expected ChipIds") }
+  guard ids.contains(id_a) && ids.contains(id_b) else {
+    fail("expected both chip ids in list")
+  }
 }
 
 ///|
