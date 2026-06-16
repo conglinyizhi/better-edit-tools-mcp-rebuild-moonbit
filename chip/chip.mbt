@@ -1,4 +1,7 @@
 ///|
+let max_chip_count : Int = 30
+
+///|
 fn cache_dir() -> String {
   match @env.get_env_var("LOCALAPPDATA") {
     Some(dir) => dir + "/better-edit-tools-mcp/chips"
@@ -53,8 +56,31 @@ fn ensure_dir_all(path : String) -> Unit raise @error.BeError {
 }
 
 ///|
-fn chip_path(id : String) -> String {
-  cache_dir() + "/" + id
+fn pad_left(s : String, len : Int, char : Char) -> String {
+  if s.length() >= len {
+    s
+  } else {
+    String::make(len - s.length(), char) + s
+  }
+}
+
+///|
+fn chip_filename(id : String) -> String {
+  chip_counter.val += 1
+  let time_seq = pad_left(@env.now().to_string(), 20, '0')
+  let count_seq = pad_left(chip_counter.val.to_string(), 10, '0')
+  time_seq + "_" + count_seq + "_" + id
+}
+
+///|
+fn id_from_filename(filename : String) -> String? {
+  // filename format: {time_seq}_{count_seq}_{id}
+  let first = filename.find("_")
+  guard first is Some(first_idx) else { return None }
+  let rest = filename.sub(start=first_idx + 1, end=filename.length()).to_owned()
+  let second = rest.find("_")
+  guard second is Some(second_idx) else { return None }
+  Some(rest.sub(start=second_idx + 1, end=rest.length()).to_owned())
 }
 
 ///|
@@ -74,6 +100,9 @@ fn bytes_to_hex(bytes : Array[Byte]) -> String {
   }
   chars.join("")
 }
+
+///|
+let chip_counter : Ref[Int] = { val: 0 }
 
 ///|
 let rand : Ref[@random.Rand?] = { val: None }
@@ -101,14 +130,52 @@ fn generate_chip_id() -> String {
 }
 
 ///|
+fn list_filenames() -> Array[String] raise @error.BeError {
+  let dir = cache_dir()
+  if !@fs.path_exists(dir) {
+    return []
+  }
+  let entries = @fs.read_dir(dir) catch {
+    IOError(msg) => raise @error.BeError::ReadError(msg)
+  }
+  let filenames = []
+  for entry in entries {
+    let path = dir + "/" + entry
+    let is_regular = @fs.is_file(path) catch {
+      IOError(msg) => raise @error.BeError::ReadError(msg)
+    }
+    if is_regular && entry.contains("_") {
+      filenames.push(entry)
+    }
+  }
+  filenames.sort()
+  filenames
+}
+
+///|
+fn evict_oldest_if_needed() -> Unit raise @error.BeError {
+  let filenames = list_filenames()
+  let dir = cache_dir()
+  for i in 0..<(filenames.length() - max_chip_count) {
+    let oldest = filenames[i]
+    @fs.remove_file(dir + "/" + oldest) catch {
+      _ => ()
+    }
+  }
+}
+
+///|
 /// 将 content 保存到 chip 缓存，返回分配的 chip id。
+/// 当缓存数量超过 30 时，会自动丢弃最早写入的 chip。
 pub fn save(content : String) -> String raise @error.BeError {
   ensure_cache_dir()
   let id = generate_chip_id()
-  let path = chip_path(id)
+  let filename = chip_filename(id)
+  let path = cache_dir() + "/" + filename
   @fs.write_string_to_file(path, content) catch {
     IOError(msg) => raise @error.BeError::WriteError(msg)
   }
+  evict_oldest_if_needed()
   id
 }
 
@@ -128,45 +195,55 @@ pub fn resolve(source : String) -> String raise @error.BeError {
 ///|
 /// 根据 id 读取 chip 内容，不存在时返回 FileNotFound 错误。
 pub fn read(id : String) -> String raise @error.BeError {
-  let path = chip_path(id)
-  guard @fs.path_exists(path) else { raise @error.BeError::FileNotFound(path) }
-  @fs.read_file_to_string(path) catch {
-    IOError(msg) => raise @error.BeError::ReadError(msg)
-  }
-}
-
-///|
-/// 返回所有已保存的 chip id，按字典序排列。
-pub fn list() -> Array[String] raise @error.BeError {
   let dir = cache_dir()
-  if !@fs.path_exists(dir) {
-    return []
-  }
+  guard @fs.path_exists(dir) else { raise @error.BeError::FileNotFound(id) }
   let entries = @fs.read_dir(dir) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
-  let ids = []
   for entry in entries {
-    let path = dir + "/" + entry
-    let is_regular = @fs.is_file(path) catch {
-      IOError(msg) => raise @error.BeError::ReadError(msg)
-    }
-    if is_regular {
-      ids.push(entry)
+    if entry.has_suffix("_" + id) {
+      let path = dir + "/" + entry
+      return @fs.read_file_to_string(path) catch {
+        IOError(msg) => raise @error.BeError::ReadError(msg)
+      }
     }
   }
-  ids.sort()
+  raise @error.BeError::FileNotFound(id)
+}
+
+///|
+/// 返回所有已保存的 chip id，按写入时间从早到晚排列。
+pub fn list() -> Array[String] raise @error.BeError {
+  let filenames = list_filenames()
+  let ids = []
+  for filename in filenames {
+    match id_from_filename(filename) {
+      Some(id) => ids.push(id)
+      None => ()
+    }
+  }
   ids
 }
 
 ///|
 /// 删除指定 chip。
 pub fn remove(id : String) -> Unit {
-  let path = chip_path(id)
-  if @fs.path_exists(path) {
-    @fs.remove_file(path) catch {
-      _ => ()
+  let dir = cache_dir()
+  if !@fs.path_exists(dir) {
+    return
+  }
+  try {
+    let entries = @fs.read_dir(dir)
+    for entry in entries {
+      if entry.has_suffix("_" + id) {
+        let path = dir + "/" + entry
+        @fs.remove_file(path) catch {
+          _ => ()
+        }
+      }
     }
+  } catch {
+    _ => ()
   }
 }
 
@@ -187,7 +264,7 @@ pub fn clear() -> Unit raise @error.BeError {
     }
     if is_regular {
       @fs.remove_file(path) catch {
-        IOError(msg) => raise @error.BeError::WriteError(msg)
+        _ => ()
       }
     }
   }

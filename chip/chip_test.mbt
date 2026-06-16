@@ -39,3 +39,25 @@ test "clear removes saved chip" {
     fail("expected id removed after clear")
   }
 }
+
+///|
+test "evict oldest chips when exceeding max count" {
+  @chip.clear()
+  let ids = []
+  for i in 0..<32 {
+    ids.push(@chip.save("content-\{i}"))
+  }
+  let current = @chip.list()
+  guard current.length() == 30 else {
+    fail(
+      "expected 30 chips after eviction, got " + current.length().to_string(),
+    )
+  }
+  guard !current.contains(ids[0]) && !current.contains(ids[1]) else {
+    fail("expected oldest two chips evicted")
+  }
+  guard current.contains(ids[31]) && current.contains(ids[30]) else {
+    fail("expected newest chips retained")
+  }
+  @chip.clear()
+}
