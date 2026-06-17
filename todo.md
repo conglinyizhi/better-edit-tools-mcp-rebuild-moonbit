@@ -451,7 +451,7 @@ pub fn replace_lines(
 - `check/balance.mbt`：`scan_balance_text(text) -> BeBalanceResult`
 - `common/lines.mbt`：`detect_line_ending`、`split_keep_line_ending`、`join_lines`
 
-### 7.2 引入文件系统抽象
+### 7.2 引入文件系统抽象 + 真实临时目录测试
 
 新增 `fs` 包，定义 trait：
 
@@ -470,9 +470,6 @@ pub trait FileSystem {
 
 /// 默认实现，基于 @fs
 pub type OSFileSystem
-
-/// 内存实现，用于测试
-pub type MemFileSystem
 ```
 
 所有 `be_*` 函数签名增加可选参数：
@@ -486,6 +483,48 @@ pub fn be_replace(
   fs? : FileSystem = OSFileSystem::new()
 ) -> Unit raise BeError
 ```
+
+**测试策略：不用内存文件系统，改为真实临时目录 + `with_temp_dir` helper。**
+
+MoonBit 没有 `finally` / `defer`，因此必须手动用 `try/catch` 包装：
+
+```moonbit
+// common/test_helper.mbt（测试专用）
+fn with_temp_dir[T](f : (String) -> T raise) -> T raise {
+  let dir = make_temp_dir()
+  try {
+    let result = f(dir)
+    cleanup_dir(dir)
+    result
+  } catch {
+    e => {
+      // 测试已失败，清理失败不应覆盖原错误
+      try { cleanup_dir(dir) } catch { _ => () }
+      raise e
+    }
+  }
+}
+
+fn make_temp_dir() -> String { ... }
+fn cleanup_dir(String) -> Unit { ... }
+```
+
+测试使用方式：
+
+```moonbit
+test "be_read returns FileNotFound for missing file" {
+  let result = try? @common.with_temp_dir(fn(dir) {
+    let path = dir + "/not-exist.mbt"
+    @read.be_read(path) // 期望抛 FileNotFound
+  })
+  assert_true(result is Err(@error.BeError::FileNotFound(_)))
+}
+```
+
+这样：
+- 测试走的是真实 `@fs` 路径，能完整捕获错误链路；
+- 成功或失败都会清理临时目录；
+- 目录名带随机后缀，避免并发冲突。
 
 ### 7.3 统一 Config
 
@@ -525,9 +564,10 @@ pub fn be_replace(
 
 | 目标 | 新增/修改文件 | 说明 |
 |---|---|---|
-| 文件系统抽象 | `fs/fs.mbt`、`fs/os_fs.mbt`、`fs/mem_fs.mbt` | trait + 默认 OS 实现 + 内存实现 |
+| 文件系统抽象 | `fs/fs.mbt`、`fs/os_fs.mbt` | trait + 默认 OS 实现 |
 | 统一配置 | `common/config.mbt` | `Config` 与 `default_config` |
 | 行处理工具 | `common/lines.mbt` | 行尾符检测、切分、合并 |
+| 测试辅助 | `common/test_helper.mbt` | `with_temp_dir`、`make_temp_dir`、`cleanup_dir` |
 | 纯逻辑替换 | `edit/replace.mbt` | 新增 `replace_lines` |
 | 纯逻辑插入 | `edit/insert.mbt` | 新增 `insert_lines` |
 | 纯逻辑删除 | `edit/delete.mbt` | 新增 `delete_line_indices` |
@@ -540,7 +580,6 @@ pub fn be_replace(
 ```moonbit
 import {
   "conglinyizhi/better-edit-tools-mcp/edit",
-  "conglinyizhi/better-edit-tools-mcp/fs",
 }
 
 fn my_tool(lines : Array[String]) -> Array[String] {
