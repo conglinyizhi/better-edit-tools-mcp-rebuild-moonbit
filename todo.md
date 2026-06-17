@@ -422,4 +422,137 @@ moon coverage analyze > uncovered.log
 
 ---
 
+## 7. 可复用性设计（让核心逻辑能被其他包调用）
+
+当前项目里的 `be_*` 函数虽然都是 `pub`，但它们是**面向 MCP/CLI 工具端点**设计的：直接读真实文件、直接写真实文件、逻辑和 I/O 混在一起。其他 MoonBit 包虽然可以 `import` 并调用，却很难做单元测试、替换存储后端或只借用其中一部分能力。
+
+建议把每个工具拆成 **“纯逻辑函数 + I/O 入口”**，并引入统一的 `Config` / `FileSystem` 抽象。
+
+### 7.1 拆分纯逻辑与 I/O
+
+以 `edit/replace.mbt` 为例，应新增纯函数：
+
+```moonbit
+/// 对行数组做范围替换，不涉及文件 I/O
+pub fn replace_lines(
+  lines : Array[String],
+  start_line : Int,
+  end_line : Int,
+  new_lines : Array[String]
+) -> Array[String] { ... }
+```
+
+`be_replace` 则负责：读文件 → 调 `replace_lines` → 原子写回 → 返回 `EditResult`。
+
+同理需要：
+- `edit/insert.mbt`：`insert_lines(lines, after, new_lines) -> Array[String]`
+- `edit/delete.mbt`：`delete_line_indices(lines, indices) -> Array[String]`
+- `check/func_range.mbt`：`scan_blocks(lines) -> Array[Block]`
+- `check/balance.mbt`：`scan_balance_text(text) -> BeBalanceResult`
+- `common/lines.mbt`：`detect_line_ending`、`split_keep_line_ending`、`join_lines`
+
+### 7.2 引入文件系统抽象
+
+新增 `fs` 包，定义 trait：
+
+```moonbit
+// fs/fs.mbt
+pub trait FileSystem {
+  read_file_to_string(String) -> String!IOError
+  write_string_to_file(String, String) -> Unit!IOError
+  path_exists(String) -> Bool
+  is_file(String) -> Bool!IOError
+  create_dir(String) -> Unit!IOError
+  remove_file(String) -> Unit!IOError
+  read_dir(String) -> Array[String]!IOError
+  rename(String, String) -> Unit!IOError
+}
+
+/// 默认实现，基于 @fs
+pub type OSFileSystem
+
+/// 内存实现，用于测试
+pub type MemFileSystem
+```
+
+所有 `be_*` 函数签名增加可选参数：
+
+```moonbit
+pub fn be_replace(
+  file : String,
+  start_line : Int,
+  end_line : Int,
+  content : String,
+  fs? : FileSystem = OSFileSystem::new()
+) -> Unit raise BeError
+```
+
+### 7.3 统一 Config
+
+用 `Config` 结构替代散落在各函数里的可选参数，方便后续扩展：
+
+```moonbit
+// common/config.mbt
+pub(all) struct Config {
+  fs : FileSystem
+  lang : String
+  no_prefix : Bool
+  snapshot_enabled : Bool
+  chip_dir : String?
+  snapshot_dir : String?
+}
+
+pub fn default_config() -> Config { ... }
+```
+
+高层工具入口使用：
+
+```moonbit
+pub fn be_replace(
+  file : String,
+  start_line : Int,
+  end_line : Int,
+  content : String,
+  config? : Config = default_config()
+) -> ReplaceResult raise BeError
+```
+
+### 7.4 保持 `be_*` 作为高层入口
+
+不要删除现有 `be_read` / `be_replace` / `be_insert` / `be_delete` / `be_write` / `be_balance` / `be_func_range` / `be_tag_range`，它们对 MCP server 和 CLI 正好够用。只需在它们下面再垫一层可复用的库函数。
+
+### 7.5 新增/修改文件清单
+
+| 目标 | 新增/修改文件 | 说明 |
+|---|---|---|
+| 文件系统抽象 | `fs/fs.mbt`、`fs/os_fs.mbt`、`fs/mem_fs.mbt` | trait + 默认 OS 实现 + 内存实现 |
+| 统一配置 | `common/config.mbt` | `Config` 与 `default_config` |
+| 行处理工具 | `common/lines.mbt` | 行尾符检测、切分、合并 |
+| 纯逻辑替换 | `edit/replace.mbt` | 新增 `replace_lines` |
+| 纯逻辑插入 | `edit/insert.mbt` | 新增 `insert_lines` |
+| 纯逻辑删除 | `edit/delete.mbt` | 新增 `delete_line_indices` |
+| 纯逻辑范围 | `check/func_range.mbt` | 新增 `scan_blocks` |
+| 纯逻辑平衡 | `check/balance.mbt` | 新增 `scan_balance_text` |
+| 修改入口签名 | `read/read.mbt`、`write/write.mbt`、`edit/*.mbt`、`check/*.mbt` | 增加 `fs?` 或 `config?` 参数 |
+
+### 7.6 对外复用示例
+
+```moonbit
+import {
+  "conglinyizhi/better-edit-tools-mcp/edit",
+  "conglinyizhi/better-edit-tools-mcp/fs",
+}
+
+fn my_tool(lines : Array[String]) -> Array[String] {
+  // 只借用纯逻辑，不操作文件
+  @edit.replace_lines(lines, 2, 4, ["fn new() {}", ""])
+}
+```
+
+这样项目才能同时是：
+- **一个可运行的 MCP 服务器 / CLI**；
+- **一个可被其他 MoonBit 项目引用的编辑工具库**。
+
+---
+
 _清单生成时间：2026-06-17。后续每完成一项，应在此文件对应条目打勾，并更新 `.mbti` 与 README。_
