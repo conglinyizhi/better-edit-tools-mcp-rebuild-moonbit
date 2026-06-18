@@ -26,5 +26,5 @@ preferred_target = "wasm-gc"
 description = ""
 
 import {
-  "moonbitlang/x@0.4.45",
+  "moonbitlang/x@0.4.41",
 }
