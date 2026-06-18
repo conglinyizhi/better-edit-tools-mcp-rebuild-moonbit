@@ -3,9 +3,20 @@
 pub(all) struct RpcRequest {
   jsonrpc : String
   id : Json?
-  method : String
+  method_ : String
   params : Json?
-} derive(ToJson)
+}
+
+///|
+/// 手动实现 ToJson，将内部字段 `method_` 输出为 JSON 键 `method`。
+pub impl ToJson for RpcRequest with fn to_json(self) -> Json {
+  {
+    "jsonrpc": self.jsonrpc.to_json(),
+    "id": self.id.to_json(),
+    "method": self.method_.to_json(),
+    "params": self.params.to_json(),
+  }
+}
 
 ///|
 /// JSON-RPC 响应。
@@ -40,7 +51,7 @@ fn read_stdin_line() -> String {
 ///|
 /// 解析 JSON 对象中的 JSON-RPC 请求字段。
 fn parse_request(json : Json) -> RpcRequest? {
-  guard json is { "jsonrpc": String(jsonrpc), "method": String(method), .. } else {
+  guard json is { "jsonrpc": String(jsonrpc), "method": String(rpc_method), .. } else {
     return None
   }
   let id = match json {
@@ -51,7 +62,7 @@ fn parse_request(json : Json) -> RpcRequest? {
     { "params": params_json, .. } => Some(params_json)
     _ => None
   }
-  Some({ jsonrpc, id, method, params })
+  Some({ jsonrpc, id, method_: rpc_method, params })
 }
 
 ///|
@@ -68,10 +79,7 @@ fn make_error(id : Json?, code : Int, message : String) -> RpcResponse {
 
 ///|
 /// MCP 服务器主循环。
-pub fn serve(
-  read_line : () -> String,
-  write_line : (String) -> Unit,
-) -> Unit raise @error.BeError {
+pub fn serve(read_line : () -> String, write_line : (String) -> Unit) -> Unit {
   while true {
     let line = read_line()
     if line.is_empty() {
@@ -101,7 +109,7 @@ pub fn serve(
         continue
       }
     }
-    match request.method {
+    match request.method_ {
       "initialize" => {
         let result : Json = {
           "protocolVersion": "2024-11-05",
@@ -160,6 +168,6 @@ pub fn serve(
 
 ///|
 /// 启动 MCP 服务器，从 stdin 读取并写入 stdout。
-pub fn run() -> Unit raise @error.BeError {
+pub fn run() -> Unit {
   serve(read_stdin_line, println)
 }

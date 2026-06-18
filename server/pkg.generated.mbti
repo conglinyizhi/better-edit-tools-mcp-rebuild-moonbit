@@ -10,9 +10,9 @@ pub fn call_tool(String, Json) -> Json raise @error.BeError
 
 pub fn list_tools() -> Array[Tool]
 
-pub fn run() -> Unit raise @error.BeError
+pub fn run() -> Unit
 
-pub fn serve(() -> String, (String) -> Unit) -> Unit raise @error.BeError
+pub fn serve(() -> String, (String) -> Unit) -> Unit
 
 // Errors
 
@@ -25,9 +25,10 @@ pub(all) struct RpcError {
 pub(all) struct RpcRequest {
   jsonrpc : String
   id : Json?
-  method : String
+  method_ : String
   params : Json?
-} derive(ToJson)
+}
+pub impl ToJson for RpcRequest
 
 pub(all) struct RpcResponse {
   jsonrpc : String

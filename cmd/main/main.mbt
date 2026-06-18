@@ -1,6 +1,6 @@
 ///|
 /// CLI entry point. Run `moon run cmd/main` to start the MCP server.
-fn main raise {
+fn main {
   let args = @sys.get_cli_args()
   if should_start_server(args) {
     @server.run()
