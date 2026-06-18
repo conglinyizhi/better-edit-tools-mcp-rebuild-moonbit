@@ -1,0 +1,19 @@
+import {
+  "conglinyizhi/better-edit-tools-mcp/read",
+  "conglinyizhi/better-edit-tools-mcp/write",
+  "conglinyizhi/better-edit-tools-mcp/edit",
+  "conglinyizhi/better-edit-tools-mcp/check",
+  "conglinyizhi/better-edit-tools-mcp/chip",
+  "conglinyizhi/better-edit-tools-mcp/error",
+  "conglinyizhi/better-edit-tools-mcp/common",
+  "moonbitlang/core/json",
+  "moonbitlang/core/strconv",
+}
+
+options(
+  targets: {
+    "rpc_native.mbt": [ "native", "llvm" ],
+    "rpc_wasm.mbt": [ "wasm", "wasm-gc" ],
+    "rpc_js.mbt": [ "js" ],
+  },
+)

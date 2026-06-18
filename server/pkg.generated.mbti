@@ -1,0 +1,38 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "conglinyizhi/better-edit-tools-mcp/server"
+
+import {
+  "conglinyizhi/better-edit-tools-mcp/error",
+}
+
+// Values
+pub fn run() -> Unit raise @error.BeError
+
+pub fn serve(() -> String, (String) -> Unit) -> Unit raise @error.BeError
+
+// Errors
+
+// Types and methods
+pub(all) struct RpcError {
+  code : Int
+  message : String
+} derive(ToJson)
+
+pub(all) struct RpcRequest {
+  jsonrpc : String
+  id : Json?
+  method : String
+  params : Json?
+} derive(ToJson)
+
+pub(all) struct RpcResponse {
+  jsonrpc : String
+  id : Json?
+  result : Json?
+  error : RpcError?
+} derive(ToJson)
+
+// Type aliases
+
+// Traits
+
