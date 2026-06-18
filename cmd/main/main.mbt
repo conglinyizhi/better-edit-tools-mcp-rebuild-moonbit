@@ -5,9 +5,23 @@ fn main {
   if should_start_server(args) {
     @server.run()
   } else {
-    let code = run_cli(args)
-    @sys.exit(code)
+    dispatch_cli_or_server(args)
   }
+}
+
+///|
+/// native target 下执行 CLI 子命令并退出；其他 target 回退到启动 MCP 服务器。
+#cfg(target="native")
+fn dispatch_cli_or_server(args : Array[String]) -> Unit {
+  let code = run_cli(args)
+  @sys.exit(code)
+}
+
+///|
+#cfg(any(target="wasm", target="wasm-gc", target="js"))
+fn dispatch_cli_or_server(args : Array[String]) -> Unit {
+  let _ = args
+  @server.run()
 }
 
 ///|

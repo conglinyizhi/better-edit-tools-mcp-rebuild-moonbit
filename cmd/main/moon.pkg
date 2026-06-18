@@ -1,5 +1,3 @@
-supported_targets = "native"
-
 import {
   "conglinyizhi/better-edit-tools-mcp/server",
   "conglinyizhi/better-edit-tools-mcp/read",
@@ -15,4 +13,10 @@ import {
 
 options(
   "is-main": true,
+  targets: {
+    "cli.mbt": [ "native", "llvm" ],
+    "cli_wbtest.mbt": [ "native", "llvm" ],
+  },
+  // cli.mbt 仅在 native 下编译，因此这些导入在其他 target 上会出现 unused_package 警告。
+  warnings: "-unused_package",
 )

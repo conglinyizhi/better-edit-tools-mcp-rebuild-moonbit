@@ -2,6 +2,7 @@
 package "conglinyizhi/better-edit-tools-mcp/cmd/main"
 
 // Values
+pub fn should_start_server(Array[String]) -> Bool
 
 // Errors
 

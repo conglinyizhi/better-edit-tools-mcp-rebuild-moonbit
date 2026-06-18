@@ -78,3 +78,12 @@
 - 内容警告（tab、行尾空白、缺少换行）依赖于写入后的完整内容，在核心逻辑里计算最自然。
 - preview 模式涉及“模拟编辑但不写入”，需要和真实编辑共享同一套行处理逻辑，放在核心层能避免行为分叉。
 - 统一返回 `EditResult` 结构，CLI 和 server 都能复用。
+
+---
+
+## CLI 子命令只在 native 上完整可用，其他 target 通过条件编译降级/禁用
+
+- AI 报告：main.mbt 使用 @sys.get_cli_args() 和 @sys.exit(code)，它们来自 moonbitlang/x/sys。这个包目前只支持 native（需要真正的 OS 进程参数和退出码）。
+- 但是 MoonBit 是多 target 支持的语言；而 moonbitlang/x/sys 只支持 native，因此，我需要让其他平台也能实现核心功能
+- 由此考虑，废除在其他平台的 CLI 功能，使用条件编译等类似的思路，在其他 target 上仅提供启动即 MCP 服务器的能力，native target 提供完全能力
+- 这个决议不影响各种工具的实现库
