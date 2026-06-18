@@ -9,7 +9,13 @@ import {
 // Values
 pub fn compute_viewed_code_id(String, Int, Int, String) -> String
 
+pub fn current_language() -> String
+
 pub fn reject_chip_target(String) -> Unit raise @error.BeError
+
+pub fn set_language(String) -> Unit
+
+pub fn t(String, lang? : String) -> String
 
 // Errors
 
