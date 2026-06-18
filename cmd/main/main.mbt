@@ -5,10 +5,8 @@ fn main {
   if should_start_server(args) {
     @server.run()
   } else {
-    println("Usage: better-edit-tools-mcp [command] [options]")
-    println("")
-    println("Without arguments, starts the MCP server over stdin/stdout.")
-    @sys.exit(0)
+    let code = run_cli(args)
+    @sys.exit(code)
   }
 }
 
@@ -16,5 +14,24 @@ fn main {
 /// Determine whether the program should start the MCP server from the
 /// command-line argument list.
 pub fn should_start_server(args : Array[String]) -> Bool {
-  args.length() <= 1
+  let mut i = 1
+  while i < args.length() {
+    let arg = args[i]
+    if arg == "--help" || arg == "--version" {
+      return false
+    }
+    if arg == "--lang" {
+      i += 2
+      continue
+    }
+    if arg == "--no-prefix" {
+      i += 1
+      continue
+    }
+    if arg.has_prefix("-") {
+      return false
+    }
+    return false
+  }
+  true
 }
