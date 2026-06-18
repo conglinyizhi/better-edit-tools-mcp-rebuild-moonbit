@@ -1,6 +1,8 @@
+supported_targets = "native"
+
 import {
-  "conglinyizhi/better-edit-tools-mcp/read",
-  "conglinyizhi/better-edit-tools-mcp/write",
+  "conglinyizhi/better-edit-tools-mcp/server",
+  "moonbitlang/x/sys",
 }
 
 options(
