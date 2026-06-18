@@ -115,12 +115,39 @@ pub fn serve(
         // 通知无需响应
         continue
       "tools/list" => {
-        let result : Json = { "tools": [] }
+        let tools = list_tools()
+        let result : Json = { "tools": tools.to_json() }
         let resp = make_response(request.id, result)
         write_line(resp.to_json().stringify())
       }
       "tools/call" => {
-        let resp = make_error(request.id, -32601, "Method not found")
+        let params = request.params.unwrap_or({})
+        let (name, args) = match params {
+          { "name": String(n), "arguments": a, .. } => (n, a)
+          { "name": String(n), "args": a, .. } => (n, a)
+          { "name": String(n), .. } => (n, {})
+          _ => {
+            let resp = make_error(
+              request.id,
+              -32602,
+              "Invalid params: missing or non-string name",
+            )
+            write_line(resp.to_json().stringify())
+            continue
+          }
+        }
+        let resp = try {
+          let result = call_tool(name, args)
+          make_response(request.id, result)
+        } catch {
+          err => {
+            let err_result : Json = {
+              "isError": true,
+              "content": [{ "type": "text", "text": error_message(err) }],
+            }
+            make_response(request.id, err_result)
+          }
+        }
         write_line(resp.to_json().stringify())
       }
       _ => {

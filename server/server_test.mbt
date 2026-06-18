@@ -129,3 +129,144 @@ test "未知方法返回 Method not found" {
     fail("Method not found 响应结构不匹配")
   }
 }
+
+///|
+test "tools/list 返回 9-10 个工具定义" {
+  let lines = ["{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/list\"}"]
+  let mut idx = 0
+  let outputs : Array[String] = []
+  fn read_line() -> String {
+    if idx < lines.length() {
+      let line = lines[idx]
+      idx = idx + 1
+      line
+    } else {
+      ""
+    }
+  }
+  fn write_line(s : String) -> Unit {
+    outputs.push(s)
+  }
+  @server.serve(read_line, write_line)
+  assert_eq(outputs.length(), 1)
+  let response = @json.parse(outputs[0]) catch {
+    _ => {
+      fail("响应不是合法 JSON")
+      null
+    }
+  }
+  guard response
+    is { "jsonrpc": String("2.0"), "id": Number(2, ..), "result": result, .. } else {
+    fail("tools/list 响应结构不匹配")
+  }
+  guard result is { "tools": Array(tools), .. } else {
+    fail("tools/list 结果缺少 tools 数组")
+  }
+  assert_true(tools.length() >= 9 && tools.length() <= 10)
+  assert_true(tools[0] is { "name": String("be-read"), .. })
+}
+
+///|
+test "tools/call be-read 成功返回 content" {
+  let req = "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"be-read\",\"arguments\":{\"file\":\"server/rpc.mbt\",\"start\":1,\"end\":2}}}"
+  let lines = [req]
+  let mut idx = 0
+  let outputs : Array[String] = []
+  fn read_line() -> String {
+    if idx < lines.length() {
+      let line = lines[idx]
+      idx = idx + 1
+      line
+    } else {
+      ""
+    }
+  }
+  fn write_line(s : String) -> Unit {
+    outputs.push(s)
+  }
+  @server.serve(read_line, write_line)
+  assert_eq(outputs.length(), 1)
+  let response = @json.parse(outputs[0]) catch {
+    _ => {
+      fail("响应不是合法 JSON")
+      null
+    }
+  }
+  guard response
+    is { "jsonrpc": String("2.0"), "id": Number(3, ..), "result": result, .. } else {
+    fail("tools/call 响应结构不匹配")
+  }
+  guard result is { "content": Array(content), .. } else {
+    fail("tools/call 结果缺少 content 数组")
+  }
+  assert_eq(content.length(), 1)
+  assert_true(content[0] is { "type": String("text"), "text": String(_), .. })
+}
+
+///|
+test "tools/call 未知工具返回 isError" {
+  let req = "{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"tools/call\",\"params\":{\"name\":\"unknown-tool\",\"arguments\":{}}}"
+  let lines = [req]
+  let mut idx = 0
+  let outputs : Array[String] = []
+  fn read_line() -> String {
+    if idx < lines.length() {
+      let line = lines[idx]
+      idx = idx + 1
+      line
+    } else {
+      ""
+    }
+  }
+  fn write_line(s : String) -> Unit {
+    outputs.push(s)
+  }
+  @server.serve(read_line, write_line)
+  assert_eq(outputs.length(), 1)
+  let response = @json.parse(outputs[0]) catch {
+    _ => {
+      fail("响应不是合法 JSON")
+      null
+    }
+  }
+  guard response is { "result": result, .. } else {
+    fail("tools/call 响应缺少 result")
+  }
+  guard result is { "isError": true, "content": Array(_), .. } else {
+    fail("未知工具应返回 isError: true")
+  }
+}
+
+///|
+test "tools/call 参数错误返回 isError" {
+  let req = "{\"jsonrpc\":\"2.0\",\"id\":5,\"method\":\"tools/call\",\"params\":{\"name\":\"be-read\",\"arguments\":{\"file\":\"/tmp/be-server-missing-file.txt\",\"start\":1}}}"
+  let lines = [req]
+  let mut idx = 0
+  let outputs : Array[String] = []
+  fn read_line() -> String {
+    if idx < lines.length() {
+      let line = lines[idx]
+      idx = idx + 1
+      line
+    } else {
+      ""
+    }
+  }
+  fn write_line(s : String) -> Unit {
+    outputs.push(s)
+  }
+  @server.serve(read_line, write_line)
+  assert_eq(outputs.length(), 1)
+  let response = @json.parse(outputs[0]) catch {
+    _ => {
+      fail("响应不是合法 JSON")
+      null
+    }
+  }
+  guard response is { "result": result, .. } else {
+    fail("tools/call 响应缺少 result")
+  }
+  guard result is { "isError": true, "content": Array(_), .. } else {
+    fail("参数错误应返回 isError: true")
+  }
+}

@@ -6,6 +6,10 @@ import {
 }
 
 // Values
+pub fn call_tool(String, Json) -> Json raise @error.BeError
+
+pub fn list_tools() -> Array[Tool]
+
 pub fn run() -> Unit raise @error.BeError
 
 pub fn serve(() -> String, (String) -> Unit) -> Unit raise @error.BeError
@@ -30,6 +34,12 @@ pub(all) struct RpcResponse {
   id : Json?
   result : Json?
   error : RpcError?
+} derive(ToJson)
+
+pub(all) struct Tool {
+  name : String
+  description : String
+  inputSchema : Json
 } derive(ToJson)
 
 // Type aliases
