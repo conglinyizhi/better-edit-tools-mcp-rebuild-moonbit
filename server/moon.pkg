@@ -5,6 +5,7 @@ import {
   "conglinyizhi/better-edit-tools-mcp/check",
   "conglinyizhi/better-edit-tools-mcp/error",
   "conglinyizhi/better-edit-tools-mcp/common",
+  "conglinyizhi/better-edit-tools-mcp/chip",
   "moonbitlang/core/json",
   "moonbitlang/core/strconv",
 }

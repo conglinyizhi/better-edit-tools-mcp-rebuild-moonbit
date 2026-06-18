@@ -270,3 +270,107 @@ test "tools/call 参数错误返回 isError" {
     fail("参数错误应返回 isError: true")
   }
 }
+
+///|
+test "list_tools 描述随语言切换" {
+  @common.set_language("zh")
+  let tools_zh = @server.list_tools()
+  assert_eq(tools_zh[0].description, "读取文件内容并显示行号。")
+  assert_eq(tools_zh[1].description, "替换文件中精确的行范围。")
+  @common.set_language("en")
+  let tools_en = @server.list_tools()
+  assert_eq(tools_en[0].description, "Read file content with line numbers.")
+  assert_eq(tools_en[1].description, "Replace a precise line range in a file.")
+}
+
+///|
+test "call_tool be-read 返回正确 JSON" {
+  let args : Json = { "file": "server/rpc.mbt", "start": 1, "end": 2 }
+  let result = @server.call_tool("be-read", args) catch {
+    _ => {
+      fail("be-read 不应失败")
+      null
+    }
+  }
+  guard result is { "content": Array(content), .. } else {
+    fail("be-read 应返回 content 数组")
+  }
+  assert_eq(content.length(), 1)
+  assert_true(content[0] is { "type": String("text"), "text": String(_), .. })
+}
+
+///|
+test "call_tool be-read brief 省略 content" {
+  let args : Json = {
+    "file": "server/rpc.mbt",
+    "start": 1,
+    "end": 2,
+    "brief": true,
+  }
+  let result = @server.call_tool("be-read", args) catch {
+    _ => {
+      fail("be-read 不应失败")
+      null
+    }
+  }
+  guard result is { "content": Array(content), .. } else {
+    fail("be-read 应返回 content 数组")
+  }
+  assert_eq(content.length(), 1)
+  guard content[0] is { "text": String(text), .. } else {
+    fail("content[0] 应包含 text")
+  }
+  let parsed = @json.parse(text) catch {
+    _ => {
+      fail("brief 响应应为合法 JSON")
+      null
+    }
+  }
+  guard parsed is { "viewed_code_id": String(_), "range": range, .. } else {
+    fail("brief 响应结构不匹配")
+  }
+  assert_true(
+    range is { "start_line": Number(1, ..), "end_line": Number(2, ..), .. },
+  )
+}
+
+///|
+test "call_tool be-write 成功返回 ok" {
+  let tmp = "/tmp/be-server-write-test.txt"
+  let args : Json = { "file": tmp, "content": "hello\\nworld" }
+  let result = @server.call_tool("be-write", args) catch {
+    _ => {
+      fail("be-write 不应失败")
+      null
+    }
+  }
+  guard result is { "content": Array(content), .. } else {
+    fail("be-write 应返回 content 数组")
+  }
+  assert_eq(content.length(), 1)
+  assert_true(
+    content[0]
+    is { "type": String("text"), "text": String("{\"status\":\"ok\"}"), .. },
+  )
+}
+
+///|
+test "call_tool 错误调用保存 args 到 chip" {
+  @common.set_language("en")
+  let args : Json = { "file": "/tmp/be-server-missing-file.txt", "start": 1 }
+  let result = @server.call_tool("be-read", args) catch {
+    _ => {
+      fail("call_tool 内部应捕获错误")
+      null
+    }
+  }
+  guard result is { "isError": true, "content": Array(content), .. } else {
+    fail("错误响应应包含 isError: true")
+  }
+  assert_eq(content.length(), 1)
+  guard content[0] is { "text": String(text), .. } else {
+    fail("错误内容应包含 text")
+  }
+  assert_true(text.contains("chip://"))
+  assert_true(text.contains("File not found"))
+}

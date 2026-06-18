@@ -9,10 +9,11 @@ pub(all) struct Tool {
 ///|
 /// 返回服务器支持的所有工具定义。
 pub fn list_tools() -> Array[Tool] {
+  let name = "be-read"
   [
     {
-      name: "be-read",
-      description: "Read file content with line numbers.",
+      name,
+      description: @common.t("tool.description." + name),
       inputSchema: {
         "type": "object",
         "properties": {
@@ -45,7 +46,7 @@ pub fn list_tools() -> Array[Tool] {
     },
     {
       name: "be-replace",
-      description: "Replace a precise line range in a file.",
+      description: @common.t("tool.description.be-replace"),
       inputSchema: {
         "type": "object",
         "properties": {
@@ -79,7 +80,7 @@ pub fn list_tools() -> Array[Tool] {
     },
     {
       name: "be-insert",
-      description: "Insert content after a specific line.",
+      description: @common.t("tool.description.be-insert"),
       inputSchema: {
         "type": "object",
         "properties": {
@@ -107,7 +108,7 @@ pub fn list_tools() -> Array[Tool] {
     },
     {
       name: "be-delete",
-      description: "Delete a line range from a file.",
+      description: @common.t("tool.description.be-delete"),
       inputSchema: {
         "type": "object",
         "properties": {
@@ -134,7 +135,7 @@ pub fn list_tools() -> Array[Tool] {
     },
     {
       name: "be-write",
-      description: "Write raw content to file(s).",
+      description: @common.t("tool.description.be-write"),
       inputSchema: {
         "type": "object",
         "properties": {
@@ -161,7 +162,7 @@ pub fn list_tools() -> Array[Tool] {
     },
     {
       name: "be-func-range",
-      description: "Find the enclosing function or brace block for a given line.",
+      description: @common.t("tool.description.be-func-range"),
       inputSchema: {
         "type": "object",
         "properties": {
@@ -173,7 +174,7 @@ pub fn list_tools() -> Array[Tool] {
     },
     {
       name: "be-tag-range",
-      description: "Find the enclosing XML/HTML/Vue tag pair for a given line.",
+      description: @common.t("tool.description.be-tag-range"),
       inputSchema: {
         "type": "object",
         "properties": {
@@ -185,7 +186,7 @@ pub fn list_tools() -> Array[Tool] {
     },
     {
       name: "be-balance",
-      description: "Check bracket, brace, parenthesis, tag, and quote balance.",
+      description: @common.t("tool.description.be-balance"),
       inputSchema: {
         "type": "object",
         "properties": {
@@ -199,7 +200,7 @@ pub fn list_tools() -> Array[Tool] {
     },
     {
       name: "be-insert-chip",
-      description: "Insert content from a file (file://) or chip cache (chip://). Omit from to list all chip IDs.",
+      description: @common.t("tool.description.be-insert-chip"),
       inputSchema: {
         "type": "object",
         "properties": {
@@ -216,7 +217,7 @@ pub fn list_tools() -> Array[Tool] {
     },
     {
       name: "be-trx-commit",
-      description: "Commit all pending edit snapshots (clear the queue).",
+      description: @common.t("tool.description.be-trx-commit"),
       inputSchema: { "type": "object", "properties": {} },
     },
   ]
