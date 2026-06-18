@@ -373,4 +373,16 @@ test "call_tool 错误调用保存 args 到 chip" {
   }
   assert_true(text.contains("chip://"))
   assert_true(text.contains("File not found"))
+  // 清理本测试保存的 chip，避免影响其他测试的 chip id 匹配。
+  let prefix = "chip://"
+  let chip_start_opt = text.find(prefix)
+  guard chip_start_opt is Some(chip_start) else {
+    fail("响应中应包含 chip://")
+  }
+  let after_chip = text.sub(start=chip_start + prefix.length()).to_owned()
+  let chip_id = match after_chip.find(")") {
+    Some(end) => after_chip.sub(start=0, end~).to_owned()
+    None => after_chip
+  }
+  @chip.remove(chip_id)
 }

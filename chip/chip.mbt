@@ -108,11 +108,21 @@ let chip_counter : Ref[Int] = { val: 0 }
 let rand : Ref[@random.Rand?] = { val: None }
 
 ///|
+fn make_seed() -> Bytes {
+  let time_str = @env.now().to_string()
+  let bytes = []
+  for i in 0..<32 {
+    bytes.push(time_str[i % time_str.length()].to_int().to_byte())
+  }
+  Bytes::from_array(bytes)
+}
+
+///|
 fn get_rand() -> @random.Rand {
   match rand.val {
     Some(r) => r
     None => {
-      let r = @random.Rand::chacha8()
+      let r = @random.Rand::chacha8(seed=make_seed())
       rand.val = Some(r)
       r
     }
@@ -123,7 +133,7 @@ fn get_rand() -> @random.Rand {
 fn generate_chip_id() -> String {
   let r = get_rand()
   let bytes = []
-  for _ in 0..<3 {
+  for _ in 0..<4 {
     bytes.push(r.uint(limit=256).to_byte())
   }
   bytes_to_hex(bytes)
