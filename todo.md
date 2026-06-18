@@ -57,7 +57,7 @@
 
 这些是当前项目**完全无法作为 MCP 工具使用**的阻塞项。
 
-#### 任务 2.1 实现 JSON-RPC / MCP 协议层
+#### [Done] 任务 2.1 实现 JSON-RPC / MCP 协议层
 
 - **目标**：在 MoonBit 中实现一个读取 `stdin` 每行 JSON、输出 JSON-RPC 2.0 响应的 MCP 服务器骨架。
 - **参考**：`internal/server/server.go`（原实现）。
@@ -445,6 +445,7 @@ pub fn replace_lines(
 `be_replace` 则负责：读文件 → 调 `replace_lines` → 原子写回 → 返回 `EditResult`。
 
 同理需要：
+
 - `edit/insert.mbt`：`insert_lines(lines, after, new_lines) -> Array[String]`
 - `edit/delete.mbt`：`delete_line_indices(lines, indices) -> Array[String]`
 - `check/func_range.mbt`：`scan_blocks(lines) -> Array[Block]`
@@ -522,6 +523,7 @@ test "be_read returns FileNotFound for missing file" {
 ```
 
 这样：
+
 - 测试走的是真实 `@fs` 路径，能完整捕获错误链路；
 - 成功或失败都会清理临时目录；
 - 目录名带随机后缀，避免并发冲突。
@@ -562,18 +564,18 @@ pub fn be_replace(
 
 ### 7.5 新增/修改文件清单
 
-| 目标 | 新增/修改文件 | 说明 |
-|---|---|---|
-| 文件系统抽象 | `fs/fs.mbt`、`fs/os_fs.mbt` | trait + 默认 OS 实现 |
-| 统一配置 | `common/config.mbt` | `Config` 与 `default_config` |
-| 行处理工具 | `common/lines.mbt` | 行尾符检测、切分、合并 |
-| 测试辅助 | `common/test_helper.mbt` | `with_temp_dir`、`make_temp_dir`、`cleanup_dir` |
-| 纯逻辑替换 | `edit/replace.mbt` | 新增 `replace_lines` |
-| 纯逻辑插入 | `edit/insert.mbt` | 新增 `insert_lines` |
-| 纯逻辑删除 | `edit/delete.mbt` | 新增 `delete_line_indices` |
-| 纯逻辑范围 | `check/func_range.mbt` | 新增 `scan_blocks` |
-| 纯逻辑平衡 | `check/balance.mbt` | 新增 `scan_balance_text` |
-| 修改入口签名 | `read/read.mbt`、`write/write.mbt`、`edit/*.mbt`、`check/*.mbt` | 增加 `fs?` 或 `config?` 参数 |
+| 目标         | 新增/修改文件                                                   | 说明                                            |
+| ------------ | --------------------------------------------------------------- | ----------------------------------------------- |
+| 文件系统抽象 | `fs/fs.mbt`、`fs/os_fs.mbt`                                     | trait + 默认 OS 实现                            |
+| 统一配置     | `common/config.mbt`                                             | `Config` 与 `default_config`                    |
+| 行处理工具   | `common/lines.mbt`                                              | 行尾符检测、切分、合并                          |
+| 测试辅助     | `common/test_helper.mbt`                                        | `with_temp_dir`、`make_temp_dir`、`cleanup_dir` |
+| 纯逻辑替换   | `edit/replace.mbt`                                              | 新增 `replace_lines`                            |
+| 纯逻辑插入   | `edit/insert.mbt`                                               | 新增 `insert_lines`                             |
+| 纯逻辑删除   | `edit/delete.mbt`                                               | 新增 `delete_line_indices`                      |
+| 纯逻辑范围   | `check/func_range.mbt`                                          | 新增 `scan_blocks`                              |
+| 纯逻辑平衡   | `check/balance.mbt`                                             | 新增 `scan_balance_text`                        |
+| 修改入口签名 | `read/read.mbt`、`write/write.mbt`、`edit/*.mbt`、`check/*.mbt` | 增加 `fs?` 或 `config?` 参数                    |
 
 ### 7.6 对外复用示例
 
@@ -589,6 +591,7 @@ fn my_tool(lines : Array[String]) -> Array[String] {
 ```
 
 这样项目才能同时是：
+
 - **一个可运行的 MCP 服务器 / CLI**；
 - **一个可被其他 MoonBit 项目引用的编辑工具库**。
 
