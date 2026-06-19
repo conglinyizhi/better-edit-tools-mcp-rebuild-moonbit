@@ -281,18 +281,7 @@
 - **验收标准**：
   - 所有工具均返回 `BeError`，MCP 层统一转为 `isError: true`。
 
-#### 任务 2.17 文件系统抽象（便于测试）
-
-- **目标**：把直接 `@fs` 调用封装成可替换的接口，支持内存文件系统测试。
-- **参考**：`pkg/fs/fs.go`、`pkg/fs/memfs.go`。
-- **需新增/修改**：
-  - `fs/abstraction.mbt`：定义 `trait FileSystem { read_file_to_string, write_string_to_file, path_exists, is_file, ... }`。
-  - `fs/os_fs.mbt`：基于 `@fs` 的实现。
-  - `fs/mem_fs.mbt`：内存实现，用于测试。
-- **验收标准**：
-  - 现有测试可使用 `MemFS` 运行，不依赖 `/tmp`。
-
-#### 任务 2.18 补全测试
+#### 任务 2.17 补全测试
 
 - **目标**：覆盖原 Go 项目的核心测试场景。
 - **参考**：原项目 `pkg/betools/*_test.go`、`pkg/fs/*_test.go`、`internal/server/server_test.go`。
@@ -307,18 +296,7 @@
   - `moon test` 测试数至少翻倍（原 Go 项目约 30+ 测试文件）。
   - 新增测试全部通过。
 
-#### 任务 2.19 文档与 README
-
-- **目标**：让 README 与使用方式对齐原项目。
-- **参考**：`README.zh.md`、`README.md`、`docs/content/*.md`。
-- **需新增/修改**：
-  - `README.md`：安装、MCP 配置、CLI 用法、工具说明、多语言参数。
-  - `README.mbt.md`：保留中文项目要求，或合并到 README。
-  - 新增 `docs/` 可选：使用 Hugo 文档站。
-- **验收标准**：
-  - 新贡献者看了 README 就能运行 MCP 服务器和 CLI。
-
-#### 任务 2.20 CI / 发布脚本
+#### 任务 2.18 CI / 发布脚本
 
 - **目标**：与原项目一样提供 GitHub Actions 与安装脚本。
 - **参考**：`.github/workflows/build.yml`、`.github/workflows/docs.yml`、`scripts/install.sh`、`.github/script/*.go`。
