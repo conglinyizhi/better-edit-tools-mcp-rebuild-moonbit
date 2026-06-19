@@ -6,8 +6,16 @@
 /// 其中 `chip://{id}` 可直接作为后续调用的 content 参数。
 pub fn be_write(file : String, content : String) -> String raise @error.BeError {
   @common.reject_chip_target(file)
+  let original_content = if @fs.path_exists(file) {
+    @fs.read_file_to_string(file) catch {
+      IOError(msg) => raise @error.BeError::WriteError(msg)
+    }
+  } else {
+    ""
+  }
   let resolved = @chip.resolve(content)
   let normalized = resolved.replace_all(old="\\n", new="\n")
+  let (_, _) = @snapshot.push_snapshot(file, original_content)
   write_file_atomic(file, normalized) catch {
     @error.BeError::WriteError(msg) =>
       return "chip://" + @chip.save(normalized) + " 写入失败：" + msg

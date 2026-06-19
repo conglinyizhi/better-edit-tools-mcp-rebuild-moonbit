@@ -1,0 +1,39 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "conglinyizhi/better-edit-tools-mcp/snapshot"
+
+import {
+  "conglinyizhi/better-edit-tools-mcp/error",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn commit_snapshots() -> Int
+
+pub fn list_snapshots() -> Array[SnapshotRecord]
+
+pub fn push_snapshot(String, String) -> (String, String)
+
+pub fn rollback_snapshots(Int) -> (Int, Array[@error.BeError])
+
+pub fn snapshot_queue_stats() -> QueueStats
+
+// Errors
+
+// Types and methods
+pub(all) struct QueueStats {
+  used : Int
+  capacity : Int
+  disk_bytes : Int64
+} derive(ToJson, @debug.Debug)
+
+pub(all) struct SnapshotRecord {
+  id : String
+  file : String
+  content : String
+  created_at : Int64
+} derive(ToJson, @debug.Debug)
+
+// Type aliases
+
+// Traits
+

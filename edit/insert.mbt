@@ -22,6 +22,7 @@ pub fn be_insert(
   let text = @fs.read_file_to_string(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
+  let (_, _) = @snapshot.push_snapshot(file, text)
   let resolved = @chip.resolve(content)
   let normalized = resolved.replace_all(old="\\n", new="\n")
   let lines = if text.is_empty() {

@@ -287,7 +287,7 @@ pub fn run_cli(args : Array[String]) -> Int {
         return 1
       }
       try {
-        @edit.be_replace(
+        let _ = @edit.be_replace(
           file,
           start_line,
           end_line,

@@ -1,6 +1,12 @@
 ///|
+/// be-replace 的返回结果，包含非致命警告。
+pub(all) struct BeReplaceResult {
+  warnings : Array[String]
+} derive(Debug, ToJson)
+
+///|
 /// 精确替换 file 中 [start_line, end_line] 范围的内容。
-/// 传入 viewed_code_id 时会与当前范围计算出的 id 校验；
+/// 传入 viewed_code_id 时会校验会话中的文件行数是否变化；
 /// 传入 old 或 old_text 时会校验当前范围内容是否一致。
 pub fn be_replace(
   file : String,
@@ -10,7 +16,7 @@ pub fn be_replace(
   viewed_code_id? : String = "",
   old? : String = "",
   old_text? : String = "",
-) -> Unit raise @error.BeError {
+) -> BeReplaceResult raise @error.BeError {
   // 验证文件并读取内容
   @common.reject_chip_target(file)
   guard @fs.path_exists(file) else { raise @error.BeError::FileNotFound(file) }
@@ -38,14 +44,13 @@ pub fn be_replace(
   }
   let current_content = selected.join("\n")
 
-  // 校验 viewed_code_id
-  let expected_id = @common.compute_viewed_code_id(
-    file, start_line, end_line, current_content,
-  )
-  if viewed_code_id.length() > 0 && viewed_code_id != expected_id {
-    raise @error.BeError::InvalidFormat(
-      "viewed_code_id 不匹配，期望：\{expected_id}，实际：\{viewed_code_id}",
-    )
+  // 校验 viewed_code_id 对应的会话，仅收集非致命警告
+  let warnings : Array[String] = []
+  if viewed_code_id.length() > 0 {
+    let (_, warning) = @session.session_from_cache(viewed_code_id)
+    if warning.length() > 0 {
+      warnings.push(warning)
+    }
   }
 
   // 校验 old / old_text
@@ -55,6 +60,9 @@ pub fn be_replace(
       "old / old_text 与当前范围内容不匹配",
     )
   }
+
+  // 写入前加入快照队列
+  let (_, _) = @snapshot.push_snapshot(file, text)
 
   // 规范化新内容并替换范围
   let resolved = @chip.resolve(content)
@@ -71,4 +79,5 @@ pub fn be_replace(
     result.push(lines[i].to_owned())
   }
   @write.write_file_atomic(file, result.join("\n"))
+  { warnings, }
 }

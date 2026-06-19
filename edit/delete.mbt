@@ -20,6 +20,7 @@ pub fn be_delete(
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
   let all_lines = text.split("\n").to_array()
+  let (_, _) = @snapshot.push_snapshot(file, text)
   let total = all_lines.length()
   let mut to_delete : Array[Int] = []
   if lines.length() > 0 {

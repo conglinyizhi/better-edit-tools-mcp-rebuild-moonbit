@@ -245,7 +245,7 @@ pub fn remove(id : String) -> Unit {
   try {
     let entries = @fs.read_dir(dir)
     for entry in entries {
-      if entry.has_suffix("_" + id) {
+      if entry.has_suffix("_" + id) || entry == "chip-" + id + ".json" {
         let path = dir + "/" + entry
         @fs.remove_file(path) catch {
           _ => ()
@@ -278,4 +278,123 @@ pub fn clear() -> Unit raise @error.BeError {
       }
     }
   }
+}
+
+///|
+/// chip 记录。
+pub(all) struct ChipRecord {
+  id : String
+  tool : String
+  args : Map[String, String]
+  err_msg : String
+  created_at : Int64
+} derive(Debug, ToJson)
+
+///|
+/// chip 队列信息。
+pub(all) struct ChipQueueInfo {
+  count : Int
+  capacity : Int
+} derive(Debug, ToJson)
+
+///|
+fn chip_json_path(id : String) -> String {
+  cache_dir() + "/chip-" + id + ".json"
+}
+
+///|
+fn parse_chip_record(text : String) -> ChipRecord? {
+  let json = @json.parse(text) catch { _ => return None }
+  guard json is Object(map) else { return None }
+  let id = match map.get("id") {
+    Some(String(s)) => s
+    _ => return None
+  }
+  let tool = match map.get("tool") {
+    Some(String(s)) => s
+    _ => return None
+  }
+  let args = match map.get("args") {
+    Some(Object(arg_map)) => {
+      let result = Map::default()
+      arg_map.each(fn(k, v) {
+        match v {
+          String(s) => result.set(k, s)
+          _ => result.set(k, v.stringify())
+        }
+      })
+      result
+    }
+    _ => Map::default()
+  }
+  let err_msg = match map.get("err_msg") {
+    Some(String(s)) => s
+    _ => ""
+  }
+  let created_at = match map.get("created_at") {
+    Some(Number(n, ..)) => @strconv.from_str(n.to_string()) catch { _ => 0L }
+    _ => 0L
+  }
+  Some({ id, tool, args, err_msg, created_at })
+}
+
+///|
+/// 保存失败工具调用的完整参数，返回 chip id。
+/// 仅在 args 字符串化后长度 > 50 时保存。
+pub fn save_chip(
+  tool : String,
+  args : Map[String, String],
+  err_msg : String,
+) -> String raise @error.BeError {
+  let args_text = args.to_json().stringify()
+  if args_text.length() <= 50 {
+    return ""
+  }
+  ensure_cache_dir()
+  let id = generate_chip_id()
+  let record = {
+    id,
+    tool,
+    args,
+    err_msg,
+    created_at: @env.now().reinterpret_as_int64(),
+  }
+  let path = chip_json_path(id)
+  @fs.write_string_to_file(path, record.to_json().stringify()) catch {
+    IOError(msg) => raise @error.BeError::WriteError(msg)
+  }
+  id
+}
+
+///|
+/// 读取 chip 记录。
+pub fn get_chip(id : String) -> ChipRecord raise @error.BeError {
+  let path = chip_json_path(id)
+  guard @fs.path_exists(path) else { raise @error.BeError::FileNotFound(id) }
+  let text = @fs.read_file_to_string(path) catch {
+    IOError(msg) => raise @error.BeError::ReadError(msg)
+  }
+  match parse_chip_record(text) {
+    Some(record) => record
+    None => raise @error.BeError::InvalidFormat("chip record invalid: " + id)
+  }
+}
+
+///|
+/// 返回 chip 队列信息。
+pub fn chip_queue_info() -> ChipQueueInfo {
+  let dir = cache_dir()
+  let count = if @fs.path_exists(dir) {
+    let entries = @fs.read_dir(dir) catch { _ => [] }
+    let mut n = 0
+    for entry in entries {
+      if entry.has_prefix("chip-") && entry.has_suffix(".json") {
+        n += 1
+      }
+    }
+    n
+  } else {
+    0
+  }
+  { count, capacity: max_chip_count }
 }

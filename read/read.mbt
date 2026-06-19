@@ -19,11 +19,10 @@ pub fn be_read(
     Some(t) => {
       @common.reject_chip_target(input)
       let range = resolve_target_span(input, t)
-      let viewed_code_id = @common.compute_viewed_code_id(
+      let viewed_code_id = @session.create_session(
         input,
         range.start_line,
         range.end_line,
-        range.content,
       )
       { viewed_code_id, range }
     }
@@ -111,8 +110,8 @@ pub fn be_read(
         selected.push(lines[i].to_owned().replace(old="\r", new=""))
       }
       let content = selected.join("\n")
-      let viewed_code_id = @common.compute_viewed_code_id(
-        path, effective_start, effective_end, content,
+      let viewed_code_id = @session.create_session(
+        path, effective_start, effective_end,
       )
       {
         viewed_code_id,

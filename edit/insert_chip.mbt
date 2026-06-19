@@ -16,7 +16,12 @@ fn read_chip_content(from : String) -> String raise @error.BeError {
     }
   } else if from.has_prefix("chip://") {
     let id = from[7:].to_owned()
-    @chip.read(id)
+    try {
+      let record = @chip.get_chip(id)
+      record.to_json().stringify()
+    } catch {
+      _ => @chip.read(id)
+    }
   } else {
     raise @error.BeError::InvalidFormat(
       "from 格式应为 file:///path 或 chip://id",
@@ -47,6 +52,7 @@ pub fn be_insert_chip(
   let text = @fs.read_file_to_string(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
+  let (_, _) = @snapshot.push_snapshot(file, text)
   let lines = text.split("\n").to_array()
   let total = lines.length()
   let pos = if line <= 0 { 0 } else if line > total { total } else { line }

@@ -2,6 +2,7 @@ import {
   "conglinyizhi/better-edit-tools-mcp/chip",
   "conglinyizhi/better-edit-tools-mcp/common",
   "conglinyizhi/better-edit-tools-mcp/error",
+  "conglinyizhi/better-edit-tools-mcp/snapshot",
   "moonbitlang/core/env",
   "moonbitlang/core/random",
   "moonbitlang/x/fs",

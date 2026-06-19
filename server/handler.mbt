@@ -1,4 +1,21 @@
 ///|
+/// 将工具调用的 Json 参数转换为字符串映射。
+fn json_to_string_map(args : Json) -> Map[String, String] {
+  let result = Map::default()
+  match args {
+    Object(map) =>
+      map.each(fn(k, v) {
+        match v {
+          String(s) => result.set(k, s)
+          _ => result.set(k, v.stringify())
+        }
+      })
+    _ => ()
+  }
+  result
+}
+
+///|
 /// 从 Json 对象中读取字符串字段。
 fn get_string(args : Json, key : String, default? : String = "") -> String {
   match args {
@@ -291,7 +308,7 @@ pub fn call_tool(name : String, args : Json) -> Json raise @error.BeError {
           let viewed_code_id = get_string(args, "viewed_code_id")
           let old = get_string(args, "old")
           let old_text = get_string(args, "old_text")
-          @edit.be_replace(
+          let replace_result = @edit.be_replace(
             file,
             start_line,
             end_line,
@@ -300,7 +317,12 @@ pub fn call_tool(name : String, args : Json) -> Json raise @error.BeError {
             old~,
             old_text~,
           )
-          make_text_response("{\"status\":\"ok\"}")
+          let json : Json = if replace_result.warnings.length() > 0 {
+            { "status": "ok", "warnings": replace_result.warnings }
+          } else {
+            { "status": "ok" }
+          }
+          make_text_response(json.stringify())
         }
       }
       "be-insert" => {
@@ -428,15 +450,48 @@ pub fn call_tool(name : String, args : Json) -> Json raise @error.BeError {
           make_text_response(result.to_json().stringify())
         }
       }
-      "be-trx-commit" =>
-        make_text_response(
-          "{\"status\":\"ok\",\"message\":\"no pending snapshots\"}",
-        )
+      "be-trx" => {
+        let action = get_string(args, "action")
+        match action {
+          "status" => {
+            let stats = @snapshot.snapshot_queue_stats()
+            make_text_response(stats.to_json().stringify())
+          }
+          "commit" => {
+            let committed = @snapshot.commit_snapshots()
+            let json : Json = { "status": "ok", "committed": committed }
+            make_text_response(json.stringify())
+          }
+          "rollback" => {
+            let step = get_int(args, "step")
+            let step = if step > 0 { step } else { 1 }
+            let (restored, errors) = @snapshot.rollback_snapshots(step)
+            let json : Json = {
+              "status": "ok",
+              "restored": restored,
+              "errors": errors.map(error_message),
+            }
+            make_text_response(json.stringify())
+          }
+          _ =>
+            raise @error.BeError::InvalidFormat("unknown trx action: " + action)
+        }
+      }
       _ => raise @error.BeError::InvalidFormat("unknown tool: " + name)
     }
   } catch {
     err => {
-      let chip_id = @chip.save(args.stringify())
+      let args_map = json_to_string_map(args)
+      let chip_id = try {
+        let id = @chip.save_chip(name, args_map, error_message(err))
+        if id.length() > 0 {
+          id
+        } else {
+          @chip.save(args.stringify())
+        }
+      } catch {
+        _ => @chip.save(args.stringify())
+      }
       let text = error_message(err) + " (saved to chip://" + chip_id + ")"
       { "isError": true, "content": [{ "type": "text", "text": text }] }
     }
