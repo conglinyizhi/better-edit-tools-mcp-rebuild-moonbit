@@ -8,7 +8,9 @@ import {
 }
 
 // Values
-pub fn be_read(String) -> BeReadResult raise @error.BeError
+pub fn be_read(String, target? : BeTarget) -> BeReadResult raise @error.BeError
+
+pub fn resolve_target_span(String, BeTarget) -> @common.BeRange raise @error.BeError
 
 // Errors
 
@@ -16,6 +18,11 @@ pub fn be_read(String) -> BeReadResult raise @error.BeError
 pub(all) struct BeReadResult {
   viewed_code_id : String
   range : @common.BeRange
+} derive(ToJson, @debug.Debug)
+
+pub(all) struct BeTarget {
+  kind : String
+  value : String
 } derive(ToJson, @debug.Debug)
 
 // Type aliases
