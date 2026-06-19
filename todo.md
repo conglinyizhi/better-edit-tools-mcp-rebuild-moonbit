@@ -152,9 +152,9 @@
 
 ---
 
-### P1 — Session、Snapshot、Chip 增强
+### [Done] P1 — Session、Snapshot、Chip 增强
 
-#### 任务 2.8 实现 Session 缓存
+#### 任务 2.8 实现 Session 缓存（已完成）
 
 - **目标**：`be-read` 返回真正的 `viewed_code_id`（UUID），并在 `be-replace` 中校验行数是否变化。
 - **参考**：`pkg/betools/session.go`、`internal/server/server.go` 中 `Read` 调用。
@@ -169,7 +169,7 @@
   - 两次读取同一范围得到不同 UUID。
   - 文件行数变化后使用旧 ID 替换返回非致命警告。
 
-#### 任务 2.9 实现快照与事务（`be-trx`）
+#### 任务 2.9 实现快照与事务（`be-trx`）（已完成）
 
 - **目标**：每次编辑自动把修改前完整文件内容加入快照队列，支持 `commit`/`rollback`/`status`。
 - **参考**：`pkg/betools/snapshot.go`、`internal/server/server.go` 中 `be-trx` 分支。
@@ -187,7 +187,7 @@
   - `be-trx action=rollback step=1` 恢复到最后一次编辑前的文件内容。
   - `be-trx action=commit` 清空队列并删除持久化文件。
 
-#### 任务 2.10 增强 Chip 系统
+#### 任务 2.10 增强 Chip 系统（已完成）
 
 - **目标**：失败工具调用保存完整参数（不仅是内容），`be-insert-chip` 能回放 chip 参数。
 - **参考**：`pkg/betools/chip.go`、`internal/server/server.go` 中 `be-insert-chip` 分支。
