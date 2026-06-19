@@ -9,18 +9,23 @@ pub fn be_delete(
   end? : Int = 0,
   start_line? : Int = 0,
   end_line? : Int = 0,
-) -> Unit raise @error.BeError {
+  format? : String = "plain",
+  preview? : Bool = false,
+  brief? : Bool = false,
+) -> EditResult raise @error.BeError {
   @common.reject_chip_target(file)
   guard @fs.path_exists(file) else { raise @error.BeError::FileNotFound(file) }
   let is_regular = @fs.is_file(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
   guard is_regular else { raise @error.BeError::NotARegularFile(file) }
+  @common.reject_binary(file)
   let text = @fs.read_file_to_string(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
   let all_lines = text.split("\n").to_array()
-  let (_, _) = @snapshot.push_snapshot(file, text)
+  let (event_id, queue_warning) = @snapshot.push_snapshot(file, text)
+  let queue_full = queue_warning.length() > 0
   let total = all_lines.length()
   let mut to_delete : Array[Int] = []
   if lines.length() > 0 {
@@ -71,5 +76,55 @@ pub fn be_delete(
     }
   }
   let result = remaining.join("\n")
+  let new_total = remaining.length()
+
+  // 构造被删除行的旧内容用于 diff
+  let old_selected = []
+  for line in to_delete {
+    old_selected.push(all_lines[line - 1].to_owned())
+  }
+  let diff_start = if to_delete.length() > 0 { to_delete[0] } else { 1 }
+  let diff_str = if !brief && format == "diff" {
+    build_diff(old_selected, [], diff_start, file)
+  } else {
+    ""
+  }
+  let balance = quick_balance_check(result)
+
+  if preview {
+    let warnings = @common.scan_content_warnings(result)
+    return {
+      status: "preview",
+      file,
+      removed: to_delete.length(),
+      added: 0,
+      total: new_total,
+      diff: diff_str,
+      balance,
+      affected: to_delete.copy(),
+      preview: true,
+      brief,
+      warnings,
+      event_id: new_event_id(),
+      queue_full: false,
+    }
+  }
+
   @write.write_file_atomic(file, result)
+  let warnings = @common.scan_content_warnings(result)
+  {
+    status: "ok",
+    file,
+    removed: to_delete.length(),
+    added: 0,
+    total: new_total,
+    diff: diff_str,
+    balance,
+    affected: to_delete.copy(),
+    preview: false,
+    brief,
+    warnings,
+    event_id,
+    queue_full,
+  }
 }

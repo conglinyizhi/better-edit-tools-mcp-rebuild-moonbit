@@ -4,7 +4,7 @@ test "delete a single line via lines" {
   @fs.write_string_to_file(
     tmp, "第一行\n第二行\n第三行\n第四行\n第五行",
   )
-  @edit.be_delete(tmp, lines=[2])
+  let _ = @edit.be_delete(tmp, lines=[2])
   let text = @fs.read_file_to_string(tmp)
   inspect(text, content="第一行\n第三行\n第四行\n第五行")
   @fs.remove_file(tmp)
@@ -16,7 +16,7 @@ test "delete multiple lines via lines" {
   @fs.write_string_to_file(
     tmp, "第一行\n第二行\n第三行\n第四行\n第五行",
   )
-  @edit.be_delete(tmp, lines=[1, 3, 5])
+  let _ = @edit.be_delete(tmp, lines=[1, 3, 5])
   let text = @fs.read_file_to_string(tmp)
   inspect(text, content="第二行\n第四行")
   @fs.remove_file(tmp)
@@ -28,7 +28,7 @@ test "delete a range via start/end" {
   @fs.write_string_to_file(
     tmp, "第一行\n第二行\n第三行\n第四行\n第五行",
   )
-  @edit.be_delete(tmp, start=2, end=4)
+  let _ = @edit.be_delete(tmp, start=2, end=4)
   let text = @fs.read_file_to_string(tmp)
   inspect(text, content="第一行\n第五行")
   @fs.remove_file(tmp)
@@ -40,7 +40,7 @@ test "delete a range via start_line/end_line" {
   @fs.write_string_to_file(
     tmp, "第一行\n第二行\n第三行\n第四行\n第五行",
   )
-  @edit.be_delete(tmp, start_line=2, end_line=4)
+  let _ = @edit.be_delete(tmp, start_line=2, end_line=4)
   let text = @fs.read_file_to_string(tmp)
   inspect(text, content="第一行\n第五行")
   @fs.remove_file(tmp)

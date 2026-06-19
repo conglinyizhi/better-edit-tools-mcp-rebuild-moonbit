@@ -287,7 +287,7 @@ pub fn run_cli(args : Array[String]) -> Int {
         return 1
       }
       try {
-        let _ = @edit.be_replace(
+        let result = @edit.be_replace(
           file,
           start_line,
           end_line,
@@ -295,7 +295,12 @@ pub fn run_cli(args : Array[String]) -> Int {
           viewed_code_id~,
           old~,
         )
-        emit_output("OK", opts.output)
+        let out = if result.preview && !result.brief && result.diff.length() > 0 {
+          result.status + "\n" + result.diff
+        } else {
+          "OK"
+        }
+        emit_output(out, opts.output)
       } catch {
         err => {
           println(format_error(err))
@@ -317,8 +322,13 @@ pub fn run_cli(args : Array[String]) -> Int {
           }
       }
       try {
-        @edit.be_insert(file, content, after_line~)
-        emit_output("OK", opts.output)
+        let result = @edit.be_insert(file, content, after_line~)
+        let out = if result.preview && !result.brief && result.diff.length() > 0 {
+          result.status + "\n" + result.diff
+        } else {
+          "OK"
+        }
+        emit_output(out, opts.output)
       } catch {
         err => {
           println(format_error(err))
@@ -344,8 +354,13 @@ pub fn run_cli(args : Array[String]) -> Int {
         None => 0
       }
       try {
-        @edit.be_delete(file, start=s, end=e)
-        emit_output("OK", opts.output)
+        let result = @edit.be_delete(file, start=s, end=e)
+        let out = if result.preview && !result.brief && result.diff.length() > 0 {
+          result.status + "\n" + result.diff
+        } else {
+          "OK"
+        }
+        emit_output(out, opts.output)
       } catch {
         err => {
           println(format_error(err))

@@ -87,6 +87,7 @@ pub fn be_read(
         IOError(msg) => raise @error.BeError::ReadError(msg)
       }
       guard is_regular else { raise @error.BeError::NotARegularFile(path) }
+      @common.reject_binary(path)
       let text = @fs.read_file_to_string(path) catch {
         IOError(msg) => raise @error.BeError::ReadError(msg)
       }

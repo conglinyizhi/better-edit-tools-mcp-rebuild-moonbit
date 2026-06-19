@@ -284,46 +284,55 @@ pub fn call_tool(name : String, args : Json) -> Json raise @error.BeError {
           (get_int(args, "start"), get_int(args, "end"))
         }
         let content = get_string(args, "content")
+        let format = get_string(args, "format", default="plain")
         let preview = get_bool(args, "preview")
         let brief = get_bool(args, "brief")
-        if preview {
-          let json : Json = if brief {
-            {
-              "status": "preview",
-              "file": file,
-              "start_line": start_line,
-              "end_line": end_line,
-            }
-          } else {
-            {
-              "status": "preview",
-              "file": file,
-              "start_line": start_line,
-              "end_line": end_line,
-              "new_content": content,
-            }
+        let viewed_code_id = get_string(args, "viewed_code_id")
+        let old = get_string(args, "old")
+        let old_text = get_string(args, "old_text")
+        let replace_result = @edit.be_replace(
+          file,
+          start_line,
+          end_line,
+          content,
+          viewed_code_id~,
+          old~,
+          old_text~,
+          format~,
+          preview~,
+          brief~,
+        )
+        let json : Json = if brief {
+          {
+            "status": replace_result.status,
+            "file": file,
+            "removed": replace_result.removed,
+            "added": replace_result.added,
+            "total": replace_result.total,
+            "affected": replace_result.affected,
+            "balance": replace_result.balance,
+            "warnings": replace_result.warnings,
+            "event_id": replace_result.event_id,
+            "queue_full": replace_result.queue_full,
           }
-          make_text_response(json.stringify())
         } else {
-          let viewed_code_id = get_string(args, "viewed_code_id")
-          let old = get_string(args, "old")
-          let old_text = get_string(args, "old_text")
-          let replace_result = @edit.be_replace(
-            file,
-            start_line,
-            end_line,
-            content,
-            viewed_code_id~,
-            old~,
-            old_text~,
-          )
-          let json : Json = if replace_result.warnings.length() > 0 {
-            { "status": "ok", "warnings": replace_result.warnings }
-          } else {
-            { "status": "ok" }
+          {
+            "status": replace_result.status,
+            "file": file,
+            "removed": replace_result.removed,
+            "added": replace_result.added,
+            "total": replace_result.total,
+            "diff": replace_result.diff,
+            "affected": replace_result.affected,
+            "balance": replace_result.balance,
+            "warnings": replace_result.warnings,
+            "event_id": replace_result.event_id,
+            "queue_full": replace_result.queue_full,
+            "preview": replace_result.preview,
+            "brief": replace_result.brief,
           }
-          make_text_response(json.stringify())
         }
+        make_text_response(json.stringify())
       }
       "be-insert" => {
         let file = get_string(args, "file")
@@ -336,24 +345,48 @@ pub fn call_tool(name : String, args : Json) -> Json raise @error.BeError {
           get_int(args, "after_line")
         }
         let content = get_string(args, "content")
+        let format = get_string(args, "format", default="plain")
         let preview = get_bool(args, "preview")
         let brief = get_bool(args, "brief")
-        if preview {
-          let json : Json = if brief {
-            { "status": "preview", "file": file, "after_line": after_line }
-          } else {
-            {
-              "status": "preview",
-              "file": file,
-              "after_line": after_line,
-              "content": content,
-            }
+        let insert_result = @edit.be_insert(
+          file,
+          content,
+          after_line~,
+          format~,
+          preview~,
+          brief~,
+        )
+        let json : Json = if brief {
+          {
+            "status": insert_result.status,
+            "file": file,
+            "removed": insert_result.removed,
+            "added": insert_result.added,
+            "total": insert_result.total,
+            "affected": insert_result.affected,
+            "balance": insert_result.balance,
+            "warnings": insert_result.warnings,
+            "event_id": insert_result.event_id,
+            "queue_full": insert_result.queue_full,
           }
-          make_text_response(json.stringify())
         } else {
-          @edit.be_insert(file, content, after_line~)
-          make_text_response("{\"status\":\"ok\"}")
+          {
+            "status": insert_result.status,
+            "file": file,
+            "removed": insert_result.removed,
+            "added": insert_result.added,
+            "total": insert_result.total,
+            "diff": insert_result.diff,
+            "affected": insert_result.affected,
+            "balance": insert_result.balance,
+            "warnings": insert_result.warnings,
+            "event_id": insert_result.event_id,
+            "queue_full": insert_result.queue_full,
+            "preview": insert_result.preview,
+            "brief": insert_result.brief,
+          }
         }
+        make_text_response(json.stringify())
       }
       "be-delete" => {
         let file = get_string(args, "file")
@@ -364,19 +397,48 @@ pub fn call_tool(name : String, args : Json) -> Json raise @error.BeError {
         } else {
           (get_int(args, "start"), get_int(args, "end"))
         }
+        let format = get_string(args, "format", default="plain")
         let preview = get_bool(args, "preview")
-        if preview {
-          let json : Json = {
-            "status": "preview",
+        let brief = get_bool(args, "brief")
+        let delete_result = @edit.be_delete(
+          file,
+          start_line~,
+          end_line~,
+          format~,
+          preview~,
+          brief~,
+        )
+        let json : Json = if brief {
+          {
+            "status": delete_result.status,
             "file": file,
-            "start_line": start_line,
-            "end_line": end_line,
+            "removed": delete_result.removed,
+            "added": delete_result.added,
+            "total": delete_result.total,
+            "affected": delete_result.affected,
+            "balance": delete_result.balance,
+            "warnings": delete_result.warnings,
+            "event_id": delete_result.event_id,
+            "queue_full": delete_result.queue_full,
           }
-          make_text_response(json.stringify())
         } else {
-          @edit.be_delete(file, start_line~, end_line~)
-          make_text_response("{\"status\":\"ok\"}")
+          {
+            "status": delete_result.status,
+            "file": file,
+            "removed": delete_result.removed,
+            "added": delete_result.added,
+            "total": delete_result.total,
+            "diff": delete_result.diff,
+            "affected": delete_result.affected,
+            "balance": delete_result.balance,
+            "warnings": delete_result.warnings,
+            "event_id": delete_result.event_id,
+            "queue_full": delete_result.queue_full,
+            "preview": delete_result.preview,
+            "brief": delete_result.brief,
+          }
         }
+        make_text_response(json.stringify())
       }
       "be-write" => {
         let file = get_string(args, "file")

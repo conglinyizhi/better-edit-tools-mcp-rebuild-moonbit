@@ -7,6 +7,11 @@
 pub fn be_write(file : String, content : String) -> String raise @error.BeError {
   @common.reject_chip_target(file)
   let original_content = if @fs.path_exists(file) {
+    let is_regular = @fs.is_file(file) catch {
+      IOError(msg) => raise @error.BeError::ReadError(msg)
+    }
+    guard is_regular else { raise @error.BeError::NotARegularFile(file) }
+    @common.reject_binary(file)
     @fs.read_file_to_string(file) catch {
       IOError(msg) => raise @error.BeError::WriteError(msg)
     }

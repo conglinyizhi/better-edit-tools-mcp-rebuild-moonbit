@@ -11,6 +11,11 @@ fn read_chip_content(from : String) -> String raise @error.BeError {
     guard @fs.path_exists(path) else {
       raise @error.BeError::FileNotFound(path)
     }
+    let is_regular = @fs.is_file(path) catch {
+      IOError(msg) => raise @error.BeError::ReadError(msg)
+    }
+    guard is_regular else { raise @error.BeError::NotARegularFile(path) }
+    @common.reject_binary(path)
     @fs.read_file_to_string(path) catch {
       IOError(msg) => raise @error.BeError::ReadError(msg)
     }
@@ -48,6 +53,7 @@ pub fn be_insert_chip(
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
   guard is_regular else { raise @error.BeError::NotARegularFile(file) }
+  @common.reject_binary(file)
   let content = read_chip_content(from)
   let text = @fs.read_file_to_string(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)

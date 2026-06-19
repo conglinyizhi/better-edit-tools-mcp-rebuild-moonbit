@@ -140,6 +140,7 @@ fn read_file_lines(file : String) -> Array[String] raise @error.BeError {
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
   guard is_regular else { raise @error.BeError::NotARegularFile(file) }
+  @common.reject_binary(file)
   let text = @fs.read_file_to_string(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
