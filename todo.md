@@ -69,7 +69,7 @@
   - 发送 `{"jsonrpc":"2.0","id":2,"method":"tools/list"}` 能返回 9–10 个工具的定义。
   - 工具调用出错时返回 `isError: true`。
 
-#### 任务 2.2 实现工具调用路由与参数绑定
+#### [Done] 任务 2.2 实现工具调用路由与参数绑定
 
 - **目标**：把 MCP 客户端发过来的参数映射到现有的 `be_*` 函数。
 - **参考**：`internal/server/server.go` 中 `callTool` 的 `switch name` 分支。
@@ -80,7 +80,7 @@
   - 每个工具都能通过 MCP JSON 调用并返回与 Go 版本结构一致的 JSON。
   - `be-write` 失败后自动生成 `chip://{id}`。
 
-#### 任务 2.3 实现命令行参数解析与子命令
+#### [Done] 任务 2.3 实现命令行参数解析与子命令
 
 - **目标**：`moon run cmd/main -- <command> [options]` 能执行单次操作并退出；无子命令时启动 MCP 服务器。
 - **参考**：`internal/app/cli.go`、`internal/app/tool.go`。
@@ -91,7 +91,7 @@
   - `./better-edit-tools read --file README.md --start 1 --end 10` 可运行。
   - `./better-edit-tools --lang zh` 以中文描述启动 MCP 服务器。
 
-#### 任务 2.4 实现本地化（i18n）
+#### [Done] 任务 2.4 实现本地化（i18n）
 
 - **目标**：工具描述与错误信息支持 `zh`/`en`。
 - **参考**：`internal/server/i18n/*.json`、`internal/app/lang.go`。
