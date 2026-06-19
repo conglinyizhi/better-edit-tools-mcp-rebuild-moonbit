@@ -48,7 +48,5 @@ pub fn be_insert(
     result.push(lines[i])
   }
   let output = result.join("\n")
-  @fs.write_string_to_file(file, output) catch {
-    IOError(msg) => raise @error.BeError::WriteError(msg)
-  }
+  @write.write_file_atomic(file, output)
 }
