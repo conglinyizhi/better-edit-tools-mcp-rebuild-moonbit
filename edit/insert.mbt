@@ -8,7 +8,10 @@ pub fn be_insert(
   content : String,
   line? : Int = 0,
   after_line? : Int = 0,
-) -> Unit raise @error.BeError {
+  format? : String = "plain",
+  preview? : Bool = false,
+  brief? : Bool = false,
+) -> EditResult raise @error.BeError {
   if line != 0 && after_line != 0 && line != after_line {
     raise @error.BeError::InvalidFormat("line 与 after_line 不一致")
   }
@@ -19,10 +22,12 @@ pub fn be_insert(
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
   guard is_regular else { raise @error.BeError::NotARegularFile(file) }
+  @common.reject_binary(file)
   let text = @fs.read_file_to_string(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
-  let (_, _) = @snapshot.push_snapshot(file, text)
+  let (event_id, queue_warning) = @snapshot.push_snapshot(file, text)
+  let queue_full = queue_warning.length() > 0
   let resolved = @chip.resolve(content)
   let normalized = resolved.replace_all(old="\\n", new="\n")
   let lines = if text.is_empty() {
@@ -40,14 +45,71 @@ pub fn be_insert(
       "行号 \{target} 超出范围 0..\{total}",
     )
   }
+  let inserted_lines : Array[String] = normalized
+    .split("\n")
+    .to_array()
+    .map(fn(s) { s.to_owned() })
   let result = []
   for i = 0; i < target; i = i + 1 {
     result.push(lines[i])
   }
-  result.push(normalized)
+  for line in inserted_lines {
+    result.push(line)
+  }
   for i = target; i < total; i = i + 1 {
     result.push(lines[i])
   }
   let output = result.join("\n")
+  let new_total = result.length()
+
+  // 受影响行号（插入内容占据的新行）
+  let diff_start = target + 1
+  let affected = []
+  for i = 0; i < inserted_lines.length(); i = i + 1 {
+    affected.push(diff_start + i)
+  }
+
+  let diff_str = if !brief && format == "diff" {
+    build_diff([], inserted_lines, diff_start, file)
+  } else {
+    ""
+  }
+  let balance = quick_balance_check(output)
+
+  if preview {
+    let warnings = @common.scan_content_warnings(output)
+    return {
+      status: "preview",
+      file,
+      removed: 0,
+      added: inserted_lines.length(),
+      total: new_total,
+      diff: diff_str,
+      balance,
+      affected,
+      preview: true,
+      brief,
+      warnings,
+      event_id: new_event_id(),
+      queue_full: false,
+    }
+  }
+
   @write.write_file_atomic(file, output)
+  let warnings = @common.scan_content_warnings(output)
+  {
+    status: "ok",
+    file,
+    removed: 0,
+    added: inserted_lines.length(),
+    total: new_total,
+    diff: diff_str,
+    balance,
+    affected,
+    preview: false,
+    brief,
+    warnings,
+    event_id,
+    queue_full,
+  }
 }

@@ -15,7 +15,11 @@ pub fn has_file_range(String) -> Bool
 
 pub fn parse_file_range(String) -> (String, Int, Int) raise @error.BeError
 
+pub fn reject_binary(String) -> Unit raise @error.BeError
+
 pub fn reject_chip_target(String) -> Unit raise @error.BeError
+
+pub fn scan_content_warnings(String) -> Array[String]
 
 pub fn set_language(String) -> Unit
 

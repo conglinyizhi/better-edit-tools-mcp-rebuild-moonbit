@@ -2,7 +2,7 @@
 test "be_insert 在文件开头插入内容" {
   let tmp = "/tmp/be-insert-begin.txt"
   @fs.write_string_to_file(tmp, "第一行\n第二行\n第三行")
-  @edit.be_insert(tmp, "新行", line=0)
+  let _ = @edit.be_insert(tmp, "新行", line=0)
   let text = @fs.read_file_to_string(tmp)
   inspect(text, content="新行\n第一行\n第二行\n第三行")
   @fs.remove_file(tmp)
@@ -12,7 +12,7 @@ test "be_insert 在文件开头插入内容" {
 test "be_insert 在指定行后插入并把字面 \\n 转为换行" {
   let tmp = "/tmp/be-insert-middle.txt"
   @fs.write_string_to_file(tmp, "第一行\n第二行\n第三行")
-  @edit.be_insert(tmp, "插入1\\n插入2", line=2)
+  let _ = @edit.be_insert(tmp, "插入1\\n插入2", line=2)
   let text = @fs.read_file_to_string(tmp)
   inspect(text, content="第一行\n第二行\n插入1\n插入2\n第三行")
   @fs.remove_file(tmp)
@@ -22,7 +22,7 @@ test "be_insert 在指定行后插入并把字面 \\n 转为换行" {
 test "be_insert 的 after_line 别名与 line 等价" {
   let tmp = "/tmp/be-insert-alias.txt"
   @fs.write_string_to_file(tmp, "第一行\n第二行\n第三行")
-  @edit.be_insert(tmp, "新行", after_line=2)
+  let _ = @edit.be_insert(tmp, "新行", after_line=2)
   let text = @fs.read_file_to_string(tmp)
   inspect(text, content="第一行\n第二行\n新行\n第三行")
   @fs.remove_file(tmp)
@@ -77,7 +77,7 @@ test "be_insert 支持 chip://id 作为 content" {
   let tmp = "/tmp/be-insert-chip-content.txt"
   @fs.write_string_to_file(tmp, "第一行\n第二行")
   let chip_id = @chip.save("来自 chip 的内容")
-  @edit.be_insert(tmp, "chip://" + chip_id, line=1)
+  let _ = @edit.be_insert(tmp, "chip://" + chip_id, line=1)
   let text = @fs.read_file_to_string(tmp)
   inspect(text, content="第一行\n来自 chip 的内容\n第二行")
   @fs.remove_file(tmp)

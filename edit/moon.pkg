@@ -6,6 +6,7 @@ import {
   "conglinyizhi/better-edit-tools-mcp/snapshot",
   "conglinyizhi/better-edit-tools-mcp/write",
   "moonbitlang/x/fs",
+  "moonbitlang/core/env",
   "moonbitlang/core/json",
   "moonbitlang/core/strconv",
 }

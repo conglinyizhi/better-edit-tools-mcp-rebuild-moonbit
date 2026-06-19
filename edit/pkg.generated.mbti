@@ -7,13 +7,13 @@ import {
 }
 
 // Values
-pub fn be_delete(String, lines? : Array[Int], start? : Int, end? : Int, start_line? : Int, end_line? : Int) -> Unit raise @error.BeError
+pub fn be_delete(String, lines? : Array[Int], start? : Int, end? : Int, start_line? : Int, end_line? : Int, format? : String, preview? : Bool, brief? : Bool) -> EditResult raise @error.BeError
 
-pub fn be_insert(String, String, line? : Int, after_line? : Int) -> Unit raise @error.BeError
+pub fn be_insert(String, String, line? : Int, after_line? : Int, format? : String, preview? : Bool, brief? : Bool) -> EditResult raise @error.BeError
 
 pub fn be_insert_chip(String, line? : Int, from? : String) -> BeInsertChipResult raise @error.BeError
 
-pub fn be_replace(String, Int, Int, String, viewed_code_id? : String, old? : String, old_text? : String) -> BeReplaceResult raise @error.BeError
+pub fn be_replace(String, Int, Int, String, viewed_code_id? : String, old? : String, old_text? : String, format? : String, preview? : Bool, brief? : Bool) -> EditResult raise @error.BeError
 
 // Errors
 
@@ -23,8 +23,20 @@ pub(all) enum BeInsertChipResult {
   ChipIds(Array[String])
 } derive(ToJson, @debug.Debug)
 
-pub(all) struct BeReplaceResult {
+pub(all) struct EditResult {
+  status : String
+  file : String
+  removed : Int
+  added : Int
+  total : Int
+  diff : String
+  balance : String
+  affected : Array[Int]
+  preview : Bool
+  brief : Bool
   warnings : Array[String]
+  event_id : String
+  queue_full : Bool
 } derive(ToJson, @debug.Debug)
 
 // Type aliases
