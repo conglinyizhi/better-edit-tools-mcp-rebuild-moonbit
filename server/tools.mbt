@@ -216,9 +216,19 @@ pub fn list_tools() -> Array[Tool] {
       },
     },
     {
-      name: "be-trx-commit",
-      description: @common.t("tool.description.be-trx-commit"),
-      inputSchema: { "type": "object", "properties": {} },
+      name: "be-trx",
+      description: @common.t("tool.description.be-trx"),
+      inputSchema: {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["status", "commit", "rollback"],
+          },
+          "step": { "type": "integer", "minimum": 1 },
+        },
+        "required": ["action"],
+      },
     },
   ]
 }

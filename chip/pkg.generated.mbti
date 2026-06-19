@@ -3,10 +3,15 @@ package "conglinyizhi/better-edit-tools-mcp/chip"
 
 import {
   "conglinyizhi/better-edit-tools-mcp/error",
+  "moonbitlang/core/debug",
 }
 
 // Values
+pub fn chip_queue_info() -> ChipQueueInfo
+
 pub fn clear() -> Unit raise @error.BeError
+
+pub fn get_chip(String) -> ChipRecord raise @error.BeError
 
 pub fn list() -> Array[String] raise @error.BeError
 
@@ -18,9 +23,23 @@ pub fn resolve(String) -> String raise @error.BeError
 
 pub fn save(String) -> String raise @error.BeError
 
+pub fn save_chip(String, Map[String, String], String) -> String raise @error.BeError
+
 // Errors
 
 // Types and methods
+pub(all) struct ChipQueueInfo {
+  count : Int
+  capacity : Int
+} derive(ToJson, @debug.Debug)
+
+pub(all) struct ChipRecord {
+  id : String
+  tool : String
+  args : Map[String, String]
+  err_msg : String
+  created_at : Int64
+} derive(ToJson, @debug.Debug)
 
 // Type aliases
 

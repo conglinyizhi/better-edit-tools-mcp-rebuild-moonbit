@@ -1,0 +1,29 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "conglinyizhi/better-edit-tools-mcp/session"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn cleanup_expired_sessions() -> Unit
+
+pub fn create_session(String, Int, Int) -> String
+
+pub fn session_from_cache(String) -> (ReadSession?, String)
+
+// Errors
+
+// Types and methods
+pub(all) struct ReadSession {
+  path : String
+  start_line : Int
+  end_line : Int
+  line_count : Int
+  created_at : Int64
+} derive(ToJson, @debug.Debug)
+
+// Type aliases
+
+// Traits
+

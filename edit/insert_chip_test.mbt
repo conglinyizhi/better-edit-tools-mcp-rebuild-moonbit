@@ -107,6 +107,25 @@ test "file not found for target" {
 }
 
 ///|
+
+///|
+test "insert from chip://id replays full chip record" {
+  @chip.clear()
+  let target = "/tmp/be-insert-chip-replay-target.txt"
+  @fs.write_string_to_file(target, "alpha\nbeta")
+  let args = { "file": "/tmp/be-insert-chip-replay.txt", "content": "gamma" }
+  let chip_id = @chip.save_chip("be-write", args, "Write failed")
+  assert_true(chip_id.length() > 0)
+  let result = @edit.be_insert_chip(target, line=2, from="chip://" + chip_id)
+  json_inspect(result, content="Inserted")
+  let text = @fs.read_file_to_string(target)
+  assert_true(text.contains("\"tool\":\"be-write\""))
+  assert_true(text.contains("gamma"))
+  @fs.remove_file(target)
+  @chip.remove(chip_id)
+}
+
+///|
 test "be_insert_chip 拒绝 chip:// 作为目标文件" {
   try {
     let _ = @edit.be_insert_chip("chip://some-id", from="file:///tmp/x.txt")

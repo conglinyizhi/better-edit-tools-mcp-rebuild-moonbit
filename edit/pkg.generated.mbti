@@ -13,7 +13,7 @@ pub fn be_insert(String, String, line? : Int, after_line? : Int) -> Unit raise @
 
 pub fn be_insert_chip(String, line? : Int, from? : String) -> BeInsertChipResult raise @error.BeError
 
-pub fn be_replace(String, Int, Int, String, viewed_code_id? : String, old? : String, old_text? : String) -> Unit raise @error.BeError
+pub fn be_replace(String, Int, Int, String, viewed_code_id? : String, old? : String, old_text? : String) -> BeReplaceResult raise @error.BeError
 
 // Errors
 
@@ -21,6 +21,10 @@ pub fn be_replace(String, Int, Int, String, viewed_code_id? : String, old? : Str
 pub(all) enum BeInsertChipResult {
   Inserted
   ChipIds(Array[String])
+} derive(ToJson, @debug.Debug)
+
+pub(all) struct BeReplaceResult {
+  warnings : Array[String]
 } derive(ToJson, @debug.Debug)
 
 // Type aliases

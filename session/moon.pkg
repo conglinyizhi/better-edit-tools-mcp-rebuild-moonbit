@@ -1,8 +1,9 @@
 import {
-  "conglinyizhi/better-edit-tools-mcp/check",
   "conglinyizhi/better-edit-tools-mcp/common",
   "conglinyizhi/better-edit-tools-mcp/error",
-  "conglinyizhi/better-edit-tools-mcp/session",
   "moonbitlang/x/fs",
+  "moonbitlang/core/json",
+  "moonbitlang/core/random",
   "moonbitlang/core/strconv",
+  "moonbitlang/core/env",
 }

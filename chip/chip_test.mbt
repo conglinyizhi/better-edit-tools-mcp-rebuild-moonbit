@@ -61,3 +61,48 @@ test "evict oldest chips when exceeding max count" {
   }
   @chip.clear()
 }
+
+///|
+test "save_chip 保存完整参数并返回 chip id" {
+  @chip.clear()
+  let args = {
+    "file": "/tmp/chip-test-long-args.txt",
+    "content": "x".repeat(60),
+  }
+  let id = @chip.save_chip("be-write", args, "Write error")
+  assert_true(id.length() > 0)
+  let record = @chip.get_chip(id)
+  assert_eq(record.tool, "be-write")
+  assert_eq(record.err_msg, "Write error")
+  assert_true(record.args.get("content") is Some(_))
+  @chip.remove(id)
+}
+
+///|
+test "save_chip 对短参数不保存" {
+  let args = { "x": "1" }
+  let id = @chip.save_chip("be-read", args, "Error")
+  assert_eq(id, "")
+}
+
+///|
+test "get_chip 对缺失 id 抛出 FileNotFound" {
+  try {
+    let _ = @chip.get_chip("missing-chip-id-xyz")
+    fail("expected FileNotFound")
+  } catch {
+    @error.BeError::FileNotFound(_) => ()
+    _ => fail("expected FileNotFound")
+  }
+}
+
+///|
+test "chip_queue_info 返回 count 与 capacity" {
+  @chip.clear()
+  let args = { "content": "x".repeat(60) }
+  let _ = @chip.save_chip("be-write", args, "err")
+  let info = @chip.chip_queue_info()
+  assert_eq(info.capacity, 30)
+  assert_true(info.count >= 1)
+  @chip.clear()
+}
