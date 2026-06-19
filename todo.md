@@ -247,7 +247,7 @@
 
 ### P2 — 边界、测试与工程化
 
-#### 任务 2.14 行尾符与空行处理
+#### 任务 2.14 行尾符与空行处理（已完成）
 
 - **目标**：正确处理 CRLF、保留原文件换行风格、最后一行无换行等情况。
 - **参考**：`pkg/betools/core.go` 中 `detectLineEnding`、`splitKeepLineEnding`、`prepareContentLines`。
@@ -258,7 +258,7 @@
   - CRLF 文件写入后仍为 CRLF。
   - 空文件 `be_read` 返回 0 行且不崩溃。
 
-#### 任务 2.15 实现多文件写入与降级 JSON 解析
+#### 任务 2.15 实现多文件写入与降级 JSON 解析（已完成）
 
 - **目标**：`be-write` 支持 `{"files":[{"file":"...","content":"..."}]}`，并在 JSON 异常时降级解析。
 - **参考**：`pkg/betools/write.go`。
@@ -271,7 +271,7 @@
   - 多文件 JSON 写入两个文件均成功。
   - 带未转义换行的 JSON 仍能通过降级解析写入。
 
-#### 任务 2.16 统一错误变体
+#### 任务 2.16 统一错误变体（已完成）
 
 - **目标**：扩展 `BeError`，使其能表达参数错误、路径相关错误、读写错误等。
 - **参考**：`pkg/betools/error.go`。
@@ -281,7 +281,7 @@
 - **验收标准**：
   - 所有工具均返回 `BeError`，MCP 层统一转为 `isError: true`。
 
-#### 任务 2.17 补全测试
+#### 任务 2.17 补全测试（已完成）
 
 - **目标**：覆盖原 Go 项目的核心测试场景。
 - **参考**：原项目 `pkg/betools/*_test.go`、`pkg/fs/*_test.go`、`internal/server/server_test.go`。
@@ -296,7 +296,7 @@
   - `moon test` 测试数至少翻倍（原 Go 项目约 30+ 测试文件）。
   - 新增测试全部通过。
 
-#### 任务 2.18 CI / 发布脚本
+#### 任务 2.18 CI / 发布脚本（已完成）
 
 - **目标**：与原项目一样提供 GitHub Actions 与安装脚本。
 - **参考**：`.github/workflows/build.yml`、`.github/workflows/docs.yml`、`scripts/install.sh`、`.github/script/*.go`。
