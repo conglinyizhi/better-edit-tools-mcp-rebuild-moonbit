@@ -70,7 +70,5 @@ pub fn be_replace(
   for i in end_line..<total {
     result.push(lines[i].to_owned())
   }
-  @fs.write_string_to_file(file, result.join("\n")) catch {
-    IOError(msg) => raise @error.BeError::WriteError(msg)
-  }
+  @write.write_file_atomic(file, result.join("\n"))
 }

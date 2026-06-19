@@ -2,5 +2,16 @@ import {
   "conglinyizhi/better-edit-tools-mcp/chip",
   "conglinyizhi/better-edit-tools-mcp/common",
   "conglinyizhi/better-edit-tools-mcp/error",
+  "moonbitlang/core/env",
+  "moonbitlang/core/random",
   "moonbitlang/x/fs",
 }
+
+options(
+  "native-stub": [ "atomic_native.c" ],
+  targets: {
+    "atomic_native.mbt": [ "native", "llvm" ],
+    "atomic_js.mbt": [ "js" ],
+    "atomic_wasm.mbt": [ "wasm", "wasm-gc" ],
+  },
+)
