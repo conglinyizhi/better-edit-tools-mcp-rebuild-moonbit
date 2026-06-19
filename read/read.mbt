@@ -91,8 +91,14 @@ pub fn be_read(
       let text = @fs.read_file_to_string(path) catch {
         IOError(msg) => raise @error.BeError::ReadError(msg)
       }
-      let lines = text.split("\n").to_array()
+      let lines = @common.split_lines(text)
       let total = lines.length()
+      if total == 0 {
+        return {
+          viewed_code_id: @session.create_session(path, 0, 0),
+          range: { start_line: 0, end_line: 0, content: "" },
+        }
+      }
       let effective_start = if start_line > total { total } else { start_line }
       let effective_end = if range_opt is None ||
         end_line > total ||
@@ -108,7 +114,7 @@ pub fn be_read(
       }
       let selected = []
       for i in (effective_start - 1)..<effective_end {
-        selected.push(lines[i].to_owned().replace(old="\r", new=""))
+        selected.push(lines[i])
       }
       let content = selected.join("\n")
       let viewed_code_id = @session.create_session(

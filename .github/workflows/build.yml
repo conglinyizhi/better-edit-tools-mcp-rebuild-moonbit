@@ -1,0 +1,29 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [main, master, doing/**]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MoonBit
+        uses: moonbitlang/setup-moonbit@v1
+
+      - name: Check formatting
+        run: moon fmt --check
+
+      - name: Run tests
+        run: moon test
+
+      - name: Build project
+        run: moon build
+
+      - name: Generate interface info
+        run: moon info

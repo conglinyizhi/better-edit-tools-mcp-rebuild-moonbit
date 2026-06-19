@@ -8,6 +8,7 @@ import {
   "conglinyizhi/better-edit-tools-mcp/error",
   "moonbitlang/x/sys",
   "moonbitlang/x/fs",
+  "moonbitlang/core/json",
   "moonbitlang/core/strconv",
 }
 

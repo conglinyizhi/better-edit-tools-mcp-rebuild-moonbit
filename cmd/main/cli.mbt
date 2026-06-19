@@ -18,13 +18,17 @@ fn format_error(err : @error.BeError) -> String {
   match err {
     @error.BeError::InvalidFormat(msg) =>
       @common.t("error.InvalidFormat") + ": " + msg
+    @error.BeError::InvalidArgument(msg) =>
+      @common.t("error.InvalidArgument") + ": " + msg
     @error.BeError::FileNotFound(msg) =>
       @common.t("error.FileNotFound") + ": " + msg
     @error.BeError::NotARegularFile(msg) =>
       @common.t("error.NotARegularFile") + ": " + msg
+    @error.BeError::PathError(msg) => @common.t("error.PathError") + ": " + msg
     @error.BeError::ReadError(msg) => @common.t("error.ReadError") + ": " + msg
     @error.BeError::WriteError(msg) =>
       @common.t("error.WriteError") + ": " + msg
+    @error.BeError::IOError(msg) => @common.t("error.IOError") + ": " + msg
   }
 }
 
@@ -374,12 +378,15 @@ pub fn run_cli(args : Array[String]) -> Int {
         return 1
       }
       try {
-        let result = @write.be_write(file, content)
-        if result.length() > 0 {
-          let _ = emit_output(result, opts.output)
-          2
-        } else {
-          emit_output("OK", opts.output)
+        let input : Json = { "file": file, "content": content }
+        let result = @write.be_write(input.stringify())
+        let failed = result.results.find_first(fn(r) { r != "ok" })
+        match failed {
+          Some(msg) => {
+            let _ = emit_output(msg, opts.output)
+            2
+          }
+          None => emit_output("OK", opts.output)
         }
       } catch {
         err => {

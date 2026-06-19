@@ -33,7 +33,7 @@ pub fn be_func_range(
   let text = @fs.read_file_to_string(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
-  let raw_lines = text.split("\n").to_array()
+  let raw_lines = @common.split_lines(text)
   let total = raw_lines.length()
   guard line >= 1 && line <= total else {
     raise @error.BeError::InvalidFormat(
@@ -55,18 +55,18 @@ pub fn be_func_range(
   }
   let content_lines = []
   for i in (b.start - 1)..<b.end {
-    content_lines.push(raw_lines[i].to_owned().replace(old="\r", new=""))
+    content_lines.push(raw_lines[i])
   }
   { start_line: b.start, end_line: b.end, content: content_lines.join("\n") }
 }
 
 ///|
-fn scan_blocks(lines : Array[StringView]) -> Array[Block] {
+fn scan_blocks(lines : Array[String]) -> Array[Block] {
   let blocks : Array[Block] = []
   let stack : Array[Int] = []
   let mut state = FuncRangeState::Normal
   for i = 0; i < lines.length(); i = i + 1 {
-    let chars = lines[i].to_owned().to_array()
+    let chars = lines[i].to_array()
     let mut j = 0
     while j < chars.length() {
       let c = chars[j]

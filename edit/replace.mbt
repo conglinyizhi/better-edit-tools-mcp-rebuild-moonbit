@@ -25,9 +25,10 @@ pub fn be_replace(
   let text = @fs.read_file_to_string(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
+  let line_ending = @common.detect_file_line_ending(file)
 
   // 验证行范围
-  let lines = text.split("\n").to_array()
+  let lines = @common.split_lines(text)
   let total = lines.length()
   guard start_line >= 1 && end_line >= start_line && end_line <= total else {
     raise @error.BeError::InvalidFormat(
@@ -38,7 +39,7 @@ pub fn be_replace(
   // 构建当前范围内容
   let selected = []
   for i in (start_line - 1)..<end_line {
-    selected.push(lines[i].to_owned().replace(old="\r", new=""))
+    selected.push(lines[i])
   }
   let current_content = selected.join("\n")
 
@@ -62,23 +63,22 @@ pub fn be_replace(
   // 规范化新内容
   let resolved = @chip.resolve(content)
   let normalized = resolved.replace_all(old="\\n", new="\n")
-  let new_lines : Array[String] = normalized
-    .split("\n")
-    .to_array()
-    .map(fn(s) { s.to_owned() })
+  let new_lines : Array[String] = @common.prepare_content_lines(
+    normalized, line_ending,
+  )
 
   // 构造编辑后内容
   let result_lines = []
   for i in 0..<(start_line - 1) {
-    result_lines.push(lines[i].to_owned())
+    result_lines.push(lines[i])
   }
   for line in new_lines {
     result_lines.push(line)
   }
   for i in end_line..<total {
-    result_lines.push(lines[i].to_owned())
+    result_lines.push(lines[i])
   }
-  let new_content = result_lines.join("\n")
+  let new_content = result_lines.join(line_ending)
   let new_total = result_lines.length()
 
   // 受影响行号

@@ -106,13 +106,17 @@ fn error_message(err : @error.BeError) -> String {
   match err {
     @error.BeError::InvalidFormat(msg) =>
       @common.t("error.InvalidFormat") + ": " + msg
+    @error.BeError::InvalidArgument(msg) =>
+      @common.t("error.InvalidArgument") + ": " + msg
     @error.BeError::FileNotFound(msg) =>
       @common.t("error.FileNotFound") + ": " + msg
     @error.BeError::NotARegularFile(msg) =>
       @common.t("error.NotARegularFile") + ": " + msg
+    @error.BeError::PathError(msg) => @common.t("error.PathError") + ": " + msg
     @error.BeError::ReadError(msg) => @common.t("error.ReadError") + ": " + msg
     @error.BeError::WriteError(msg) =>
       @common.t("error.WriteError") + ": " + msg
+    @error.BeError::IOError(msg) => @common.t("error.IOError") + ": " + msg
   }
 }
 
@@ -446,24 +450,30 @@ pub fn call_tool(name : String, args : Json) -> Json raise @error.BeError {
         let files = get_array(args, "files")
         let preview = get_bool(args, "preview")
         let brief = get_bool(args, "brief")
+        let extract = get_bool(args, "extract")
         if files.length() > 0 {
           if preview {
             let json : Json = { "status": "preview", "files": files.length() }
             make_text_response(json.stringify())
           } else {
-            let mut failed = ""
+            let file_specs : Array[Json] = []
             for f in files {
               let f_file = get_string(f, "file")
               let f_content = get_string(f, "content")
-              let msg = @write.be_write(f_file, f_content)
-              if !msg.is_empty() && failed.is_empty() {
-                failed = msg
+              file_specs.push({ "file": f_file, "content": f_content })
+            }
+            let input : Json = { "files": file_specs, "extract": extract }
+            let result = @write.be_write(input.stringify())
+            let mut failed_msg = ""
+            for r in result.results {
+              if r != "ok" && failed_msg == "" {
+                failed_msg = r
               }
             }
-            if failed.is_empty() {
+            if failed_msg == "" {
               make_text_response("{\"status\":\"ok\"}")
             } else {
-              make_text_response(failed)
+              make_text_response(failed_msg)
             }
           }
         } else if preview {
@@ -474,11 +484,22 @@ pub fn call_tool(name : String, args : Json) -> Json raise @error.BeError {
           }
           make_text_response(json.stringify())
         } else {
-          let msg = @write.be_write(file, content)
-          if msg.is_empty() {
+          let input : Json = {
+            "file": file,
+            "content": content,
+            "extract": extract,
+          }
+          let result = @write.be_write(input.stringify())
+          let mut failed_msg = ""
+          for r in result.results {
+            if r != "ok" && failed_msg == "" {
+              failed_msg = r
+            }
+          }
+          if failed_msg == "" {
             make_text_response("{\"status\":\"ok\"}")
           } else {
-            make_text_response(msg)
+            make_text_response(failed_msg)
           }
         }
       }

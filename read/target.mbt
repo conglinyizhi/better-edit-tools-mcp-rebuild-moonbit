@@ -32,6 +32,9 @@ fn resolve_line_span(
   let (_, start, end) = @common.parse_file_range("x:" + value)
   let lines = read_file_lines(file)
   let total = lines.length()
+  if total == 0 {
+    return { start_line: 0, end_line: 0, content: "" }
+  }
   let effective_start = if start < 1 {
     1
   } else if start > total {
@@ -144,8 +147,5 @@ fn read_file_lines(file : String) -> Array[String] raise @error.BeError {
   let text = @fs.read_file_to_string(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
-  text
-  .split("\n")
-  .to_array()
-  .map(fn(s) { s.to_owned().replace(old="\r", new="") })
+  @common.split_lines(text)
 }

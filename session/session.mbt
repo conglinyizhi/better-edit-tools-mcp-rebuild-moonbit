@@ -125,10 +125,7 @@ fn current_line_count(path : String) -> Int {
     return 0
   }
   let text = @fs.read_file_to_string(path) catch { _ => return 0 }
-  if text.is_empty() {
-    return 0
-  }
-  text.split("\n").to_array().length()
+  @common.split_lines(text).length()
 }
 
 ///|

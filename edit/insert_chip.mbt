@@ -58,18 +58,19 @@ pub fn be_insert_chip(
   let text = @fs.read_file_to_string(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
+  let line_ending = @common.detect_file_line_ending(file)
   let (_, _) = @snapshot.push_snapshot(file, text)
-  let lines = text.split("\n").to_array()
+  let lines = @common.split_lines(text)
   let total = lines.length()
   let pos = if line <= 0 { 0 } else if line > total { total } else { line }
   let result = []
   for i in 0..<pos {
-    result.push(lines[i].to_owned())
+    result.push(lines[i])
   }
   result.push(content)
   for i in pos..<total {
-    result.push(lines[i].to_owned())
+    result.push(lines[i])
   }
-  @write.write_file_atomic(file, result.join("\n"))
+  @write.write_file_atomic(file, result.join(line_ending))
   Inserted
 }

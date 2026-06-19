@@ -6,10 +6,13 @@ package "conglinyizhi/better-edit-tools-mcp/error"
 // Errors
 pub(all) suberror BeError {
   InvalidFormat(String)
+  InvalidArgument(String)
   FileNotFound(String)
   NotARegularFile(String)
+  PathError(String)
   ReadError(String)
   WriteError(String)
+  IOError(String)
 }
 
 // Types and methods

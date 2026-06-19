@@ -9,6 +9,7 @@ import {
   "conglinyizhi/better-edit-tools-mcp/snapshot",
   "moonbitlang/core/json",
   "moonbitlang/core/strconv",
+  "moonbitlang/x/fs",
 }
 
 options(
@@ -17,4 +18,5 @@ options(
     "rpc_wasm.mbt": [ "wasm", "wasm-gc" ],
     "rpc_js.mbt": [ "js" ],
   },
+  warnings: "-unused_package",
 )

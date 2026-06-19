@@ -114,8 +114,10 @@ pub fn be_tag_range(
   let text = @fs.read_file_to_string(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
-  let normalized = text.replace_all(old="\r", new="")
-  let lines = normalized.split("\n").to_array()
+  let normalized = text
+    .replace_all(old="\r\n", new="\n")
+    .replace_all(old="\r", new="\n")
+  let lines = @common.split_lines(text)
   let total = lines.length()
   guard line >= 1 && line <= total else {
     raise @error.BeError::InvalidFormat(
