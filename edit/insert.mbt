@@ -26,29 +26,21 @@ pub fn be_insert(
   let text = @fs.read_file_to_string(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
+  let line_ending = @common.detect_file_line_ending(file)
   let (event_id, queue_warning) = @snapshot.push_snapshot(file, text)
   let queue_full = queue_warning.length() > 0
   let resolved = @chip.resolve(content)
   let normalized = resolved.replace_all(old="\\n", new="\n")
-  let lines = if text.is_empty() {
-    []
-  } else {
-    let arr = text.split("\n").to_array()
-    if text.has_suffix("\n") {
-      arr.pop() |> ignore
-    }
-    arr
-  }
+  let lines = @common.split_lines(text)
   let total = lines.length()
   guard target >= 0 && target <= total else {
     raise @error.BeError::InvalidFormat(
       "行号 \{target} 超出范围 0..\{total}",
     )
   }
-  let inserted_lines : Array[String] = normalized
-    .split("\n")
-    .to_array()
-    .map(fn(s) { s.to_owned() })
+  let inserted_lines : Array[String] = @common.prepare_content_lines(
+    normalized, line_ending,
+  )
   let result = []
   for i = 0; i < target; i = i + 1 {
     result.push(lines[i])
@@ -59,7 +51,7 @@ pub fn be_insert(
   for i = target; i < total; i = i + 1 {
     result.push(lines[i])
   }
-  let output = result.join("\n")
+  let output = result.join(line_ending)
   let new_total = result.length()
 
   // 受影响行号（插入内容占据的新行）

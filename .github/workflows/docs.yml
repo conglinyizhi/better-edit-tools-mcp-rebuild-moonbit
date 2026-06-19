@@ -1,0 +1,25 @@
+name: Generate Docs
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MoonBit
+        uses: moonbitlang/setup-moonbit@v1
+
+      - name: Generate documentation
+        run: moon doc
+
+      - name: Upload docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: moonbit-docs
+          path: target/doc

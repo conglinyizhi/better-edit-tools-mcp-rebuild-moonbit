@@ -3,7 +3,7 @@
 /// 返回警告字符串数组。
 pub fn scan_content_warnings(content : String) -> Array[String] {
   let warnings : Array[String] = []
-  let lines = content.split("\n").to_array()
+  let lines = split_lines(content)
   let mut trailing = false
   let mut tab_lines = 0
   let mut non_empty = 0

@@ -23,7 +23,8 @@ pub fn be_delete(
   let text = @fs.read_file_to_string(file) catch {
     IOError(msg) => raise @error.BeError::ReadError(msg)
   }
-  let all_lines = text.split("\n").to_array()
+  let line_ending = @common.detect_file_line_ending(file)
+  let all_lines = @common.split_lines(text)
   let (event_id, queue_warning) = @snapshot.push_snapshot(file, text)
   let queue_full = queue_warning.length() > 0
   let total = all_lines.length()
@@ -72,16 +73,16 @@ pub fn be_delete(
   for i = 0; i < all_lines.length(); i = i + 1 {
     let line_no = i + 1
     if !delete_set.contains(line_no) {
-      remaining.push(all_lines[i].to_owned())
+      remaining.push(all_lines[i])
     }
   }
-  let result = remaining.join("\n")
+  let result = remaining.join(line_ending)
   let new_total = remaining.length()
 
   // 构造被删除行的旧内容用于 diff
   let old_selected = []
   for line in to_delete {
-    old_selected.push(all_lines[line - 1].to_owned())
+    old_selected.push(all_lines[line - 1])
   }
   let diff_start = if to_delete.length() > 0 { to_delete[0] } else { 1 }
   let diff_str = if !brief && format == "diff" {

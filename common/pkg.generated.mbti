@@ -11,9 +11,17 @@ pub fn compute_viewed_code_id(String, Int, Int, String) -> String
 
 pub fn current_language() -> String
 
+pub fn detect_file_line_ending(String) -> String raise @error.BeError
+
+pub fn detect_line_ending(String) -> String
+
+pub fn detect_line_ending_from_bytes(Bytes) -> String
+
 pub fn has_file_range(String) -> Bool
 
 pub fn parse_file_range(String) -> (String, Int, Int) raise @error.BeError
+
+pub fn prepare_content_lines(String, String) -> Array[String]
 
 pub fn reject_binary(String) -> Unit raise @error.BeError
 
@@ -22,6 +30,10 @@ pub fn reject_chip_target(String) -> Unit raise @error.BeError
 pub fn scan_content_warnings(String) -> Array[String]
 
 pub fn set_language(String) -> Unit
+
+pub fn split_keep_line_ending(String) -> Array[String]
+
+pub fn split_lines(String) -> Array[String]
 
 pub fn t(String, lang? : String) -> String
 

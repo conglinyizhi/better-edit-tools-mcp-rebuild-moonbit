@@ -3,10 +3,13 @@ package "conglinyizhi/better-edit-tools-mcp/write"
 
 import {
   "conglinyizhi/better-edit-tools-mcp/error",
+  "moonbitlang/core/debug",
 }
 
 // Values
-pub fn be_write(String, String) -> String raise @error.BeError
+pub fn be_write(String) -> WriteResult raise @error.BeError
+
+pub fn be_write_single(String, String) -> String raise @error.BeError
 
 pub fn write_file_atomic(String, String) -> Unit raise @error.BeError
 
@@ -15,6 +18,12 @@ pub fn write_files_atomic(Array[(String, String)]) -> Unit raise @error.BeError
 // Errors
 
 // Types and methods
+pub(all) struct WriteResult {
+  degraded : Bool
+  files : Array[String]
+  results : Array[String]
+  warnings : Array[String]
+} derive(ToJson, @debug.Debug)
 
 // Type aliases
 
