@@ -205,9 +205,9 @@
 
 ---
 
-### P1 — 工具输出与体验
+### [Done] P1 — 工具输出与体验
 
-#### 任务 2.11 统一编辑结果类型与 diff 输出
+#### 任务 2.11 统一编辑结果类型与 diff 输出（已完成）
 
 - **目标**：`be-replace`/`be-insert`/`be-delete` 返回结构化结果，支持 `format=plain|diff`、`preview`、`brief`、内容警告、括号快速检查。
 - **参考**：`pkg/betools/types.go`、`pkg/betools/ops.go`、`pkg/betools/diff.go`。
@@ -223,7 +223,7 @@
   - `preview=true` 不写入文件但返回 diff。
   - `brief=true` 省略 diff。
 
-#### 任务 2.12 实现内容警告
+#### 任务 2.12 实现内容警告（已完成）
 
 - **目标**：写入/替换/插入/删除后检查 tab、行尾空白、文件末换行，并返回警告。
 - **参考**：`pkg/betools/core.go` 中 `scanContentWarnings`、`isTabDominant`。
@@ -233,7 +233,7 @@
   - 写入带行尾空格的内容返回 `"content contains trailing whitespace..."`。
   - Makefile/Go 等以 tab 为主的文件不触发 tab 警告。
 
-#### 任务 2.13 二进制文件检测
+#### 任务 2.13 二进制文件检测（已完成）
 
 - **目标**：`be-read` 等读取前拒绝二进制文件。
 - **参考**：`pkg/betools/core.go` 中 `rejectBinary`、`isBinarySample`。
