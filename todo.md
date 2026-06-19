@@ -53,7 +53,7 @@
 
 ## 2. 缺失功能详细清单（按优先级）
 
-### P0 — MCP 服务器与 CLI 入口
+### [Done] P0 — MCP 服务器与 CLI 入口
 
 这些是当前项目**完全无法作为 MCP 工具使用**的阻塞项。
 
@@ -104,9 +104,9 @@
 
 ---
 
-### P0 — 核心行为补齐
+### [Done] P0 — 核心行为补齐
 
-#### 任务 2.5 实现文件路径+行号后缀解析
+#### 任务 2.5 实现文件路径+行号后缀解析（已完成）
 
 - **目标**：统一解析 `path/to/file.go:10`、`file.go:5-15`、`file.go:ALL`，兼容 Windows 盘符与 `file://` 协议。
 - **参考**：`pkg/betools/parse_file_range.go`。
@@ -120,7 +120,7 @@
   - `parse_file_range("C:\\foo.txt:3")` 返回 `("C:\\foo.txt", 3, 3)`。
   - `:ALL` 返回 `(-1, -1)`。
 
-#### 任务 2.6 实现 `target` 解析（`be-read` 增强）
+#### 任务 2.6 实现 `target` 解析（`be-read` 增强）（已完成）
 
 - **目标**：`be-read` 支持 `target: { kind, value }`，根据行号/函数名/标记/tag 自动解析范围。
 - **参考**：`pkg/betools/target.go`、`internal/server/server.go` 中 `be-read` 分支。
@@ -137,7 +137,7 @@
 - **验收标准**：
   - `be_read("src/main.go", target={kind:"function", value:"main"})` 返回 `main` 函数的范围。
 
-#### 任务 2.7 实现原子写入
+#### 任务 2.7 实现原子写入（已完成）
 
 - **目标**：所有写操作通过临时文件 + 重命名 + fsync 完成，进程崩溃不损坏原文件；多文件写入支持事务回滚。
 - **参考**：`pkg/betools/core.go`（`writeFileAtomic`、`writeFilesAtomic`、`rollbackCommitted`、`cleanupPlans`）。
