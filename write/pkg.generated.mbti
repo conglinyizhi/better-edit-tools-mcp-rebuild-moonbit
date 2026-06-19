@@ -8,6 +8,10 @@ import {
 // Values
 pub fn be_write(String, String) -> String raise @error.BeError
 
+pub fn write_file_atomic(String, String) -> Unit raise @error.BeError
+
+pub fn write_files_atomic(Array[(String, String)]) -> Unit raise @error.BeError
+
 // Errors
 
 // Types and methods

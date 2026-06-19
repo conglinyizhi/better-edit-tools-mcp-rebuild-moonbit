@@ -70,7 +70,5 @@ pub fn be_delete(
     }
   }
   let result = remaining.join("\n")
-  @fs.write_string_to_file(file, result) catch {
-    IOError(msg) => raise @error.BeError::WriteError(msg)
-  }
+  @write.write_file_atomic(file, result)
 }

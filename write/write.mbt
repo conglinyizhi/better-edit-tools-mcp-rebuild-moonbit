@@ -8,9 +8,10 @@ pub fn be_write(file : String, content : String) -> String raise @error.BeError 
   @common.reject_chip_target(file)
   let resolved = @chip.resolve(content)
   let normalized = resolved.replace_all(old="\\n", new="\n")
-  @fs.write_string_to_file(file, normalized) catch {
-    IOError(msg) =>
+  write_file_atomic(file, normalized) catch {
+    @error.BeError::WriteError(msg) =>
       return "chip://" + @chip.save(normalized) + " 写入失败：" + msg
+    e => raise e
   }
   ""
 }
