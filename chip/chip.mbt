@@ -381,6 +381,12 @@ pub fn get_chip(id : String) -> ChipRecord raise @error.BeError {
 }
 
 ///|
+/// 返回 chip 缓存目录，用于测试验证路径策略。
+pub fn chip_cache_dir() -> String {
+  cache_dir()
+}
+
+///|
 /// 返回 chip 队列信息。
 pub fn chip_queue_info() -> ChipQueueInfo {
   let dir = cache_dir()

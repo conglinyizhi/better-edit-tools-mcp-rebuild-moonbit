@@ -380,7 +380,13 @@ pub fn run_cli(args : Array[String]) -> Int {
       try {
         let input : Json = { "file": file, "content": content }
         let result = @write.be_write(input.stringify())
-        let failed = result.results.find_first(fn(r) { r != "ok" })
+        let mut failed : String? = None
+        for r in result.results {
+          if r != "ok" {
+            failed = Some(r)
+            break
+          }
+        }
         match failed {
           Some(msg) => {
             let _ = emit_output(msg, opts.output)

@@ -91,9 +91,23 @@ pub fn be_delete(
     ""
   }
   let balance = quick_balance_check(result)
+  let deleted_content = old_selected.join("\n")
+  let chip_warning = if deleted_content.length() > 0 {
+    let chip_id = @chip.save(deleted_content) catch { _ => "" }
+    if chip_id.length() > 0 {
+      "deleted content saved to chip://" + chip_id
+    } else {
+      ""
+    }
+  } else {
+    ""
+  }
 
   if preview {
     let warnings = @common.scan_content_warnings(result)
+    if chip_warning.length() > 0 {
+      warnings.push(chip_warning)
+    }
     return {
       status: "preview",
       file,
@@ -113,6 +127,9 @@ pub fn be_delete(
 
   @write.write_file_atomic(file, result)
   let warnings = @common.scan_content_warnings(result)
+  if chip_warning.length() > 0 {
+    warnings.push(chip_warning)
+  }
   {
     status: "ok",
     file,

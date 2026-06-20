@@ -157,6 +157,16 @@ pub fn be_tag_range(
           raise @error.BeError::InvalidFormat("未闭合的 HTML/XML 注释")
       }
     }
+    if starts_with_at(normalized, "<![CDATA[", pos) {
+      let end = find_sub(normalized, "]]>", pos + 9)
+      match end {
+        Some(e) => {
+          pos = e + 3
+          continue
+        }
+        None => raise @error.BeError::InvalidFormat("未闭合的 CDATA")
+      }
+    }
     if normalized[pos + 1] == '!' {
       let end = find_tag_end(normalized, pos + 2)
       match end {

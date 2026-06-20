@@ -4,7 +4,14 @@
 >
 > - 原 Go 实现：`/home/clyzhi/disk/ai_workspace/better-edit-tools-mcp`
 > - 当前 MoonBit 移植：`/home/clyzhi/disk/ai_workspace/better-edit-tools-mcp-rebuild-moonbit`
-> - 当前状态：`moon test` 通过 67 个测试，但 `cmd/main` 仅为占位符，尚未实现 MCP 服务器与 CLI。
+> - 当前状态：`moon test` 通过 **273** 个测试，MCP 服务器骨架、核心工具、session/snapshot/chip、i18n、降级写入、diff/preview 等已补齐。
+
+## 2026-06-20 更新：Go 回归/边界测试补全
+
+- 新增 `testutil` 包，提供 `with_temp_file` 用于真实 `/tmp` 临时文件 + 异常清理。
+- 修复/补齐行为：负 `end` 语义、`be_delete` 保存 chip、`snapshot` 满队列 warning、function target 定义优先/CDATA 跳过。
+- 迁移并新增边界测试覆盖 `read/write/edit/check/chip/snapshot/session/common/target` 等包。
+- 当前所有测试通过：`moon test` 273 passed / 0 failed；已执行 `moon fmt && moon info`。
 
 ## 1. 项目目标与现状
 

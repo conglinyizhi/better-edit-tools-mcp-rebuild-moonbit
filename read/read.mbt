@@ -71,9 +71,9 @@ pub fn be_read(
               (line, line)
             }
           }
-          guard start >= 1 && end >= start else {
+          guard start >= 1 else {
             raise @error.BeError::InvalidFormat(
-              "行号必须为正整数且 start <= end，当前为：\{range}",
+              "start 必须为正整数，当前为：\{range}",
             )
           }
           (start, end)
@@ -99,15 +99,24 @@ pub fn be_read(
           range: { start_line: 0, end_line: 0, content: "" },
         }
       }
-      let effective_start = if start_line > total { total } else { start_line }
-      let effective_end = if range_opt is None ||
-        end_line > total ||
-        end_line < 1 {
+      guard start_line <= total else {
+        raise @error.BeError::InvalidFormat(
+          "start \{start_line} 超出文件总行数 \{total}",
+        )
+      }
+      let effective_start = start_line
+      let effective_end = if range_opt is None {
+        total
+      } else if end_line < 0 {
+        total + end_line + 1
+      } else if end_line > total {
         total
       } else {
         end_line
       }
-      guard effective_start >= 1 && effective_end >= effective_start else {
+      guard effective_start >= 1 &&
+        effective_end >= 1 &&
+        effective_end >= effective_start else {
         raise @error.BeError::InvalidFormat(
           "行范围 \{effective_start}-\{effective_end} 无效，文件总行数为 \{total}",
         )

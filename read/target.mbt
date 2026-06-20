@@ -64,6 +64,9 @@ fn resolve_marker_span(
   file : String,
   value : String,
 ) -> @common.BeRange raise @error.BeError {
+  guard value.trim().length() > 0 else {
+    raise @error.BeError::InvalidFormat("marker value cannot be empty")
+  }
   let lines = read_file_lines(file)
   for i = 0; i < lines.length(); i = i + 1 {
     if lines[i].contains(value) {
@@ -79,11 +82,28 @@ fn resolve_function_span(
   file : String,
   value : String,
 ) -> @common.BeRange raise @error.BeError {
-  let matches = find_matching_lines(file, value)
-  guard matches.length() > 0 else {
+  let lines = read_file_lines(file)
+  let definition_lines = []
+  let fallback_lines = []
+  for i = 0; i < lines.length(); i = i + 1 {
+    let line = lines[i]
+    if line.contains(value) {
+      if is_function_definition(line, value) {
+        definition_lines.push(i + 1)
+      } else {
+        fallback_lines.push(i + 1)
+      }
+    }
+  }
+  let candidates = if definition_lines.length() > 0 {
+    definition_lines
+  } else {
+    fallback_lines
+  }
+  guard candidates.length() > 0 else {
     raise @error.BeError::InvalidFormat("未找到函数名 \{value}")
   }
-  for line in matches {
+  for line in candidates {
     let result = Some(@check.be_func_range(file, line)) catch {
       @error.BeError::InvalidFormat(_) => None
       e => raise e
@@ -95,6 +115,30 @@ fn resolve_function_span(
   raise @error.BeError::InvalidFormat(
     "未找到函数名 \{value} 所在的函数块",
   )
+}
+
+///|
+fn is_function_definition(line : String, name : String) -> Bool {
+  let trimmed = line.trim()
+  // Go: func NAME(...) or func (recv) NAME(...)
+  if trimmed.has_prefix("func ") {
+    let rest = trimmed.sub(start="func ".length(), end=trimmed.length())
+    let after_receiver = if rest.has_prefix("(") {
+      match rest.find(")") {
+        Some(idx) => rest.sub(start=idx + 1, end=rest.length()).trim()
+        None => rest
+      }
+    } else {
+      rest
+    }
+    return after_receiver.has_prefix(name)
+  }
+  // Rust / general: fn NAME(...)
+  if trimmed.has_prefix("fn ") {
+    let rest = trimmed.sub(start="fn ".length(), end=trimmed.length())
+    return rest.has_prefix(name)
+  }
+  false
 }
 
 ///|

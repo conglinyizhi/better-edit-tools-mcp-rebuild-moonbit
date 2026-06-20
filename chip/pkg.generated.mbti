@@ -7,6 +7,8 @@ import {
 }
 
 // Values
+pub fn chip_cache_dir() -> String
+
 pub fn chip_queue_info() -> ChipQueueInfo
 
 pub fn clear() -> Unit raise @error.BeError

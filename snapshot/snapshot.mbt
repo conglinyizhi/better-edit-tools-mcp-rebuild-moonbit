@@ -217,17 +217,21 @@ fn total_content_bytes(records : Array[SnapshotRecord]) -> Int64 {
 }
 
 ///|
-fn evict_oldest_if_needed(queue : Array[SnapshotRecord]) -> Unit {
+fn evict_oldest_if_needed(queue : Array[SnapshotRecord]) -> Bool {
+  let mut evicted = false
   // 超出数量限制
   while queue.length() > max_count {
     let oldest = queue.remove(0)
     remove_snapshot_file(oldest.id)
+    evicted = true
   }
   // 超出磁盘限制（以 content 长度近似）
   while total_content_bytes(queue) > max_bytes && queue.length() > 0 {
     let oldest = queue.remove(0)
     remove_snapshot_file(oldest.id)
+    evicted = true
   }
+  evicted
 }
 
 ///|
@@ -248,8 +252,13 @@ pub fn push_snapshot(file : String, content : String) -> (String, String) {
   }
   let queue = get_queue()
   queue.push(record)
-  evict_oldest_if_needed(queue)
-  (id, "")
+  let evicted = evict_oldest_if_needed(queue)
+  let warning = if evicted {
+    "snapshot queue is full; oldest snapshot was evicted, but current edit was written successfully"
+  } else {
+    ""
+  }
+  (id, warning)
 }
 
 ///|
@@ -285,9 +294,19 @@ pub fn rollback_snapshots(step : Int) -> (Int, Array[@error.BeError]) {
 }
 
 ///|
-/// 列出当前队列中的所有快照。
+/// 列出当前队列中的所有快照，最新快照在前。
 pub fn list_snapshots() -> Array[SnapshotRecord] {
-  get_queue().copy()
+  let queue = get_queue().copy()
+  queue.sort_by(fn(a, b) {
+    if a.created_at > b.created_at {
+      -1
+    } else if a.created_at < b.created_at {
+      1
+    } else {
+      0
+    }
+  })
+  queue
 }
 
 ///|
