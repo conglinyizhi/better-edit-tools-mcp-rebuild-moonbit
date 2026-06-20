@@ -96,3 +96,21 @@ test "be_insert 拒绝 chip:// 作为目标文件" {
     _ => (fail("expected error to be raised") : Unit)
   }
 }
+
+///|
+test "be_insert 在文件末尾插入" {
+  @testutil.with_temp_file(base_name="insert-end", tmp => {
+    @fs.write_string_to_file(tmp, "a\nb")
+    let _ = @edit.be_insert(tmp, "c", line=2)
+    assert_eq(@fs.read_file_to_string(tmp), "a\nb\nc")
+  })
+}
+
+///|
+test "be_insert 在空文件中插入" {
+  @testutil.with_temp_file(base_name="insert-empty", tmp => {
+    @fs.write_string_to_file(tmp, "")
+    let _ = @edit.be_insert(tmp, "first", line=0)
+    assert_eq(@fs.read_file_to_string(tmp), "first")
+  })
+}

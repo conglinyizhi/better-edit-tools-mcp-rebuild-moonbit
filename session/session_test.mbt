@@ -52,3 +52,14 @@ test "文件行数变化后 session_from_cache 返回警告" {
   assert_true(warning.length() > 0)
   @fs.remove_file(tmp)
 }
+
+///|
+test "session_from_cache 对底层文件被删除返回警告" {
+  let tmp = "/tmp/session-deleted-test.txt"
+  @fs.write_string_to_file(tmp, "a\nb\nc")
+  let id = @session.create_session(tmp, 1, 3)
+  @fs.remove_file(tmp)
+  let (session, warning) = @session.session_from_cache(id)
+  assert_true(session is Some(_))
+  assert_true(warning.length() > 0)
+}

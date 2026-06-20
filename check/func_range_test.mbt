@@ -101,3 +101,72 @@ test "be_func_range 目标行不在任何 {} 块内时返回 InvalidFormat" {
   }
   @fs.remove_file(tmp)
 }
+
+///|
+test "func_range 包含函数签名行" {
+  @testutil.with_temp_file(base_name="func-sig", tmp => {
+    let content =
+      #|package main
+      #|
+      #|func hello() {
+      #|  return 1
+      #|}
+    @fs.write_string_to_file(tmp, content)
+    let result = @check.be_func_range(tmp, 3)
+    assert_eq(result.start_line, 3)
+    assert_eq(result.end_line, 5)
+  })
+}
+
+///|
+test "func_range 空函数体单行返回" {
+  @testutil.with_temp_file(base_name="func-empty", tmp => {
+    let content =
+      #|package main
+      #|
+      #|func empty() {}
+    @fs.write_string_to_file(tmp, content)
+    let result = @check.be_func_range(tmp, 3)
+    assert_eq(result.start_line, 3)
+    assert_eq(result.end_line, 3)
+  })
+}
+
+///|
+test "func_range 嵌套块返回最外层函数" {
+  @testutil.with_temp_file(base_name="func-nested", tmp => {
+    let content =
+      #|package main
+      #|
+      #|func demo() {
+      #|  if true {
+      #|    for i := 0; i < 10; i++ {
+      #|      do()
+      #|    }
+      #|  }
+      #|}
+    @fs.write_string_to_file(tmp, content)
+    let result = @check.be_func_range(tmp, 3)
+    assert_eq(result.start_line, 3)
+    assert_eq(result.end_line, 9)
+  })
+}
+
+///|
+test "func_range 目标在内部块时返回最内层包含块" {
+  @testutil.with_temp_file(base_name="func-inner", tmp => {
+    let content =
+      #|package main
+      #|
+      #|func outer() {
+      #|  if true {
+      #|    innerFunc()
+      #|  }
+      #|}
+    @fs.write_string_to_file(tmp, content)
+    let result = @check.be_func_range(tmp, 5)
+    // 当前实现返回包含目标行的最内层 {} 块（if 块），而非外层函数
+    assert_eq(result.start_line, 4)
+    assert_eq(result.end_line, 6)
+  })
+}

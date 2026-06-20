@@ -137,3 +137,79 @@ test "be_read 支持 target 读取标签范围" {
   assert_true(result.viewed_code_id.length() > 0)
   @fs.remove_file(tmp)
 }
+
+///|
+test "be_read 支持负 end 从文件末尾倒数" {
+  @testutil.with_temp_file(base_name="neg-end", tmp => {
+    @fs.write_string_to_file(tmp, "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n")
+    let result = @read.be_read(tmp + ":1--3")
+    assert_eq(result.range.start_line, 1)
+    assert_eq(result.range.end_line, 9)
+    assert_true(result.range.content.contains("9"))
+    assert_false(result.range.content.contains("10"))
+  })
+}
+
+///|
+test "be_read 负 end 在 start 之前时报错" {
+  @testutil.with_temp_file(base_name="neg-end-before-start", tmp => {
+    @fs.write_string_to_file(tmp, "a\nb\nc\nd\ne\n")
+    try {
+      let _ = @read.be_read(tmp + ":3--9")
+      fail("expected error")
+    } catch {
+      @error.BeError::InvalidFormat(_) => ()
+      _ => fail("expected InvalidFormat")
+    }
+  })
+}
+
+///|
+test "be_read 负 end 精确对应到 total+end+1" {
+  @testutil.with_temp_file(base_name="neg-end-exact", tmp => {
+    @fs.write_string_to_file(tmp, "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n")
+    let result = @read.be_read(tmp + ":5--2")
+    assert_eq(result.range.end_line, 9)
+  })
+}
+
+///|
+test "be_read end=-1 保持自动模式读取到文件末尾" {
+  @testutil.with_temp_file(base_name="neg-end-auto", tmp => {
+    let content =
+      #|package main
+      #|
+      #|func demo() {
+      #|  println("x")
+      #|}
+    @fs.write_string_to_file(tmp, content)
+    let result = @read.be_read(tmp + ":3--1")
+    assert_eq(result.range.start_line, 3)
+    assert_eq(result.range.end_line, 5)
+  })
+}
+
+///|
+test "be_read start 越界报错" {
+  @testutil.with_temp_file(base_name="start-oor", tmp => {
+    @fs.write_string_to_file(tmp, "only\n")
+    try {
+      let _ = @read.be_read(tmp + ":999-1")
+      fail("expected error")
+    } catch {
+      @error.BeError::InvalidFormat(_) => ()
+      _ => fail("expected InvalidFormat")
+    }
+  })
+}
+
+///|
+test "be_read 对单行文件 start=1 正常返回" {
+  @testutil.with_temp_file(base_name="single-line", tmp => {
+    @fs.write_string_to_file(tmp, "only\n")
+    let result = @read.be_read(tmp + ":1-1")
+    assert_eq(result.range.start_line, 1)
+    assert_eq(result.range.end_line, 1)
+    assert_eq(result.range.content, "only")
+  })
+}

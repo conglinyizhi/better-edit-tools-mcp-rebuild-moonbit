@@ -94,3 +94,44 @@ test "be_delete 拒绝 chip:// 作为目标文件" {
     _ => (fail("expected error to be raised") : Unit)
   }
 }
+
+///|
+test "be_delete 删除 function target 不吞噬相邻大括号" {
+  @testutil.with_temp_file(base_name="delete-func", tmp => {
+    let content =
+      #|package main
+      #|
+      #|func first() {
+      #|  return 1
+      #|}
+      #|
+      #|func second() {
+      #|  return 2
+      #|}
+      #|
+      #|func third() {
+      #|  return 3
+      #|}
+    @fs.write_string_to_file(tmp, content)
+    let span = @read.resolve_target_span(tmp, @read.BeTarget::{
+      kind: "function",
+      value: "second",
+    })
+    let _ = @edit.be_delete(tmp, start=span.start_line, end=span.end_line)
+    let text = @fs.read_file_to_string(tmp)
+    assert_true(text.contains("func first() {"))
+    assert_true(text.contains("func third() {"))
+    assert_false(text.contains("func second() {"))
+  })
+}
+
+///|
+test "be_delete 保存 chip 引用" {
+  @testutil.with_temp_file(base_name="delete-chip", tmp => {
+    @fs.write_string_to_file(tmp, "line1\nline2\nline3")
+    let result = @edit.be_delete(tmp, start=2, end=2)
+    let has_chip = result.warnings.iter().any(fn(w) { w.contains("chip://") })
+    assert_true(has_chip)
+    assert_eq(@fs.read_file_to_string(tmp), "line1\nline3")
+  })
+}

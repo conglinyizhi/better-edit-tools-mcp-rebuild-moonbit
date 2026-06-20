@@ -68,3 +68,47 @@ test "list_snapshots 返回队列内容" {
   let _ = @snapshot.commit_snapshots()
   @fs.remove_file(tmp)
 }
+
+///|
+test "list_snapshots 最新快照在前" {
+  @testutil.with_temp_file(base_name="newest-first", tmp => {
+    let _ = @snapshot.commit_snapshots()
+    @fs.write_string_to_file(tmp, "a")
+    let (id1, _) = @snapshot.push_snapshot(tmp, "a")
+    @fs.write_string_to_file(tmp, "b")
+    let (id2, _) = @snapshot.push_snapshot(tmp, "b")
+    let list = @snapshot.list_snapshots()
+    assert_eq(list.length(), 2)
+    assert_eq(list[0].id, id2)
+    assert_eq(list[1].id, id1)
+    let _ = @snapshot.commit_snapshots()
+  })
+}
+
+///|
+test "rollback_snapshots step=0 不执行" {
+  @testutil.with_temp_file(base_name="rollback-zero", tmp => {
+    let _ = @snapshot.commit_snapshots()
+    @fs.write_string_to_file(tmp, "a")
+    let _ = @snapshot.push_snapshot(tmp, "a")
+    let (restored, errors) = @snapshot.rollback_snapshots(0)
+    assert_eq(restored, 0)
+    assert_eq(errors.length(), 0)
+    let _ = @snapshot.commit_snapshots()
+  })
+}
+
+///|
+test "rollback_snapshots step 超过队列长度时 clamp" {
+  @testutil.with_temp_file(base_name="rollback-clamp", tmp => {
+    let _ = @snapshot.commit_snapshots()
+    @fs.write_string_to_file(tmp, "a\nb\nc\n")
+    let _ = @snapshot.push_snapshot(tmp, "a\nb\nc\n")
+    @fs.write_string_to_file(tmp, "x\nb\nc\n")
+    let (restored, errors) = @snapshot.rollback_snapshots(100)
+    assert_eq(restored, 1)
+    assert_eq(errors.length(), 0)
+    assert_eq(@fs.read_file_to_string(tmp), "a\nb\nc\n")
+    let _ = @snapshot.commit_snapshots()
+  })
+}

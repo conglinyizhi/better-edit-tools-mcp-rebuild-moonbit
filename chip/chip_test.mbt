@@ -106,3 +106,23 @@ test "chip_queue_info 返回 count 与 capacity" {
   assert_true(info.count >= 1)
   @chip.clear()
 }
+
+///|
+test "save_chip 保存包含 _content 的删除内容" {
+  let args : Map[String, String] = {}
+  args.set("_content", "deleted content here".repeat(5))
+  let id = @chip.save_chip("be-delete", args, "")
+  assert_true(id.length() > 0)
+  let record = @chip.get_chip(id)
+  assert_eq(
+    record.args.get("_content").unwrap(),
+    "deleted content here".repeat(5),
+  )
+}
+
+///|
+test "chip_cache_dir 不是硬编码 /tmp/bet-chips" {
+  let dir = @chip.chip_cache_dir()
+  assert_true(dir.length() > 0)
+  assert_false(dir == "/tmp/bet-chips")
+}

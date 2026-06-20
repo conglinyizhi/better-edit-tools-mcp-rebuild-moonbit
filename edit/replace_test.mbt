@@ -137,3 +137,73 @@ test "be_replace 拒绝 chip:// 作为目标文件" {
     _ => (fail("expected error to be raised") : Unit)
   }
 }
+
+///|
+test "be_replace 替换第一行" {
+  @testutil.with_temp_file(base_name="replace-first", tmp => {
+    @fs.write_string_to_file(tmp, "old_first\nsecond\nthird")
+    let _ = @edit.be_replace(tmp, 1, 1, "new_first")
+    assert_eq(@fs.read_file_to_string(tmp), "new_first\nsecond\nthird")
+  })
+}
+
+///|
+test "be_replace 替换最后一行" {
+  @testutil.with_temp_file(base_name="replace-last", tmp => {
+    @fs.write_string_to_file(tmp, "first\nsecond\nold_last")
+    let _ = @edit.be_replace(tmp, 3, 3, "new_last")
+    assert_eq(@fs.read_file_to_string(tmp), "first\nsecond\nnew_last")
+  })
+}
+
+///|
+test "be_replace 闭区间替换多行" {
+  @testutil.with_temp_file(base_name="replace-range", tmp => {
+    @fs.write_string_to_file(tmp, "a\nb\nc\nd\ne")
+    let _ = @edit.be_replace(tmp, 2, 4, "x\ny")
+    assert_eq(@fs.read_file_to_string(tmp), "a\nx\ny\ne")
+  })
+}
+
+///|
+test "be_replace 拒绝 old 缺少末尾空行" {
+  @testutil.with_temp_file(base_name="replace-missing-empty", tmp => {
+    @fs.write_string_to_file(tmp, "a\nb\n\nc")
+    try {
+      let _ = @edit.be_replace(tmp, 2, 3, "x", old="b")
+      fail("expected error")
+    } catch {
+      @error.BeError::InvalidFormat(_) => ()
+      _ => fail("expected InvalidFormat")
+    }
+    assert_eq(@fs.read_file_to_string(tmp), "a\nb\n\nc")
+  })
+}
+
+///|
+test "be_replace 拒绝 old 多余末尾空行" {
+  @testutil.with_temp_file(base_name="replace-extra-empty", tmp => {
+    @fs.write_string_to_file(tmp, "a\nb\nc")
+    try {
+      let _ = @edit.be_replace(tmp, 2, 2, "x", old="b\n")
+      fail("expected error")
+    } catch {
+      @error.BeError::InvalidFormat(_) => ()
+      _ => fail("expected InvalidFormat")
+    }
+    assert_eq(@fs.read_file_to_string(tmp), "a\nb\nc")
+  })
+}
+
+///|
+test "be_replace 多行 tab 缩进保留" {
+  @testutil.with_temp_file(base_name="replace-tab", tmp => {
+    let content = "func foo() {\n\tif true {\n\t\tdoSomething()\n\t}\n}"
+    @fs.write_string_to_file(tmp, content)
+    let old = "\tif true {\n\t\tdoSomething()\n\t}"
+    let new_content = "\tif false {\n\t\tdoNothing()\n\t}"
+    let _ = @edit.be_replace(tmp, 2, 4, new_content, old~)
+    let expected = "func foo() {\n\tif false {\n\t\tdoNothing()\n\t}\n}"
+    assert_eq(@fs.read_file_to_string(tmp), expected)
+  })
+}

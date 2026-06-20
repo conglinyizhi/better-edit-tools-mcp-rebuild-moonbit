@@ -132,3 +132,47 @@ test "directory path raises NotARegularFile" {
     _ => fail("expected error to be raised")
   }
 }
+
+///|
+test "be_balance 跳过字符串中的大括号" {
+  @testutil.with_temp_file(base_name="balance-string", tmp => {
+    @fs.write_string_to_file(tmp, "var x = \"{\";\nvar y = \"}\";\n")
+    let result = @check.be_balance(tmp, verbose=true)
+    assert_false(result.to_json().stringify().contains("unmatched"))
+  })
+}
+
+///|
+test "be_balance 跳过注释中的大括号" {
+  @testutil.with_temp_file(base_name="balance-comment", tmp => {
+    @fs.write_string_to_file(
+      tmp, "// line comment { with brace\n/* block { comment */\nvar x = {};\n",
+    )
+    let result = @check.be_balance(tmp, verbose=true)
+    assert_false(result.to_json().stringify().contains("unmatched"))
+  })
+}
+
+///|
+test "be_balance verbose 输出包含 pairs 和 mismatches" {
+  @testutil.with_temp_file(base_name="balance-verbose", tmp => {
+    @fs.write_string_to_file(tmp, "function demo() { return 1; }\n")
+    let result = @check.be_balance(tmp, verbose=true)
+    let json = result.to_json().stringify()
+    assert_true(json.contains("pairs"))
+    assert_true(json.contains("mismatches"))
+  })
+}
+
+///|
+test "be_balance mismatch preserves line and column" {
+  @testutil.with_temp_file(base_name="balance-pos", tmp => {
+    @fs.write_string_to_file(tmp, "(a\nb]")
+    let result = @check.be_balance(tmp)
+    assert_eq(result.mismatches.length(), 2)
+    let first = result.mismatches[0]
+    assert_eq(first.kind, "bracket")
+    assert_eq(first.loc.line, 2)
+    assert_eq(first.loc.col, 2)
+  })
+}

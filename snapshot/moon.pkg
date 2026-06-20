@@ -1,8 +1,14 @@
 import {
   "conglinyizhi/better-edit-tools-mcp/error",
+  "conglinyizhi/better-edit-tools-mcp/testutil",
   "moonbitlang/x/fs",
   "moonbitlang/core/json",
   "moonbitlang/core/random",
   "moonbitlang/core/strconv",
   "moonbitlang/core/env",
 }
+
+options(
+  // testutil 仅在测试文件中使用
+  warnings: "-unused_package",
+)

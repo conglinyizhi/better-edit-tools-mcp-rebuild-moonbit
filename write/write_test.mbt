@@ -156,3 +156,69 @@ test "be_write_single 向后兼容单文件写入" {
   inspect(text, content="第一行\n第二行\n第三行")
   @fs.remove_file(tmp_file)
 }
+
+///|
+test "be_write 新文件默认使用 LF" {
+  @testutil.with_temp_file(base_name="new-lf", tmp => {
+    let input = "{\"file\":\"" + tmp + "\",\"content\":\"hello\\nworld\\n\"}"
+    let _ = @write.be_write(input)
+    let bytes = @fs.read_file_to_bytes(tmp)
+    let mut has_cr = false
+    for i = 0; i < bytes.length(); i = i + 1 {
+      if bytes[i] == b'\r' {
+        has_cr = true
+        break
+      }
+    }
+    assert_false(has_cr)
+  })
+}
+
+///|
+test "be_write 覆盖 CRLF 文件时保留换行风格" {
+  @testutil.with_temp_file(base_name="crlf-keep", tmp => {
+    @fs.write_bytes_to_file(
+      tmp,
+      Bytes::from_array([b'l', b'i', b'n', b'e', b'1', b'\r', b'\n']),
+    )
+    let input = "{\"file\":\"" + tmp + "\",\"content\":\"new1\\nnew2\\n\"}"
+    let _ = @write.be_write(input)
+    let bytes = @fs.read_file_to_bytes(tmp)
+    let mut has_crlf = false
+    for i = 0; i < bytes.length() - 1; i = i + 1 {
+      if bytes[i] == b'\r' && bytes[i + 1] == b'\n' {
+        has_crlf = true
+        break
+      }
+    }
+    assert_true(has_crlf)
+  })
+}
+
+///|
+test "be_write 混合 CRLF 输入统一为现有文件换行风格" {
+  @testutil.with_temp_file(base_name="crlf-mixed", tmp => {
+    @fs.write_bytes_to_file(
+      tmp,
+      Bytes::from_array([b'k', b'e', b'e', b'p', b'\r', b'\n']),
+    )
+    let input = "{\"file\":\"" +
+      tmp +
+      "\",\"content\":\"a\\r\\nb\\nc\\r\\nd\\n\"}"
+    let _ = @write.be_write(input)
+    let text = @fs.read_file_to_string(tmp)
+    assert_true(text.contains("\r\n"))
+    assert_false(text.contains("\n\r"))
+  })
+}
+
+///|
+test "be_write 空 content 不报告 trailing newline 警告" {
+  @testutil.with_temp_file(base_name="empty-warn", tmp => {
+    let input = "{\"file\":\"" + tmp + "\",\"content\":\"\"}"
+    let result = @write.be_write(input)
+    for warning in result.warnings {
+      assert_false(warning.contains("newline"))
+    }
+  })
+}

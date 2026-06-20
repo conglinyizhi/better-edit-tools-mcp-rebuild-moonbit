@@ -141,3 +141,107 @@ test "resolve_target_span tag not found" {
   }
   @fs.remove_file(tmp)
 }
+
+///|
+test "resolve_target_span function prefers definition over call" {
+  let tmp = "/tmp/be-target-func-def.go"
+  let content =
+    #|package main
+    #|
+    #|func foo() {
+    #|  println("def")
+    #|}
+    #|
+    #|func main() {
+    #|  foo()
+    #|}
+  @fs.write_string_to_file(tmp, content)
+  let range = resolve_target_span(tmp, { kind: "function", value: "foo" })
+  inspect(range.start_line, content="3")
+  inspect(range.end_line, content="5")
+  inspect(range.content, content="func foo() {\n  println(\"def\")\n}")
+  @fs.remove_file(tmp)
+}
+
+///|
+test "resolve_target_span function falls back to call site" {
+  let tmp = "/tmp/be-target-func-call.go"
+  let content =
+    #|package main
+    #|
+    #|func main() {
+    #|  foo()
+    #|}
+  @fs.write_string_to_file(tmp, content)
+  let range = resolve_target_span(tmp, { kind: "function", value: "foo" })
+  inspect(range.start_line, content="3")
+  inspect(range.end_line, content="5")
+  inspect(range.content, content="func main() {\n  foo()\n}")
+  @fs.remove_file(tmp)
+}
+
+///|
+test "resolve_target_span function prefers rust fn definition" {
+  let tmp = "/tmp/be-target-func-rust.rs"
+  let content =
+    #|fn main() {
+    #|    println!("hello");
+    #|}
+    #|
+    #|fn other() {
+    #|    main();
+    #|}
+  @fs.write_string_to_file(tmp, content)
+  let range = resolve_target_span(tmp, { kind: "function", value: "main" })
+  inspect(range.start_line, content="1")
+  inspect(range.end_line, content="3")
+  inspect(range.content, content="fn main() {\n    println!(\"hello\");\n}")
+  @fs.remove_file(tmp)
+}
+
+///|
+test "resolve_target_span function handles go method receiver" {
+  let tmp = "/tmp/be-target-method.go"
+  let content =
+    #|package main
+    #|
+    #|type Receiver struct{}
+    #|
+    #|func (r *Receiver) Foo() int {
+    #|  return 1
+    #|}
+  @fs.write_string_to_file(tmp, content)
+  let range = resolve_target_span(tmp, { kind: "function", value: "Foo" })
+  inspect(range.start_line, content="5")
+  inspect(range.end_line, content="7")
+  inspect(
+    range.content,
+    content="func (r *Receiver) Foo() int {\n  return 1\n}",
+  )
+  @fs.remove_file(tmp)
+}
+
+///|
+test "resolve_target_span marker rejects empty value" {
+  let tmp = "/tmp/be-target-marker-empty.txt"
+  @fs.write_string_to_file(tmp, "hello\nworld")
+  try {
+    let _ = resolve_target_span(tmp, { kind: "marker", value: "" })
+    (fail("expected InvalidFormat error") : Unit)
+  } catch {
+    @error.BeError::InvalidFormat(_) => ()
+    _ => fail("expected InvalidFormat error")
+  } noraise {
+    _ => (fail("expected error to be raised") : Unit)
+  }
+  try {
+    let _ = resolve_target_span(tmp, { kind: "marker", value: "   " })
+    (fail("expected InvalidFormat error") : Unit)
+  } catch {
+    @error.BeError::InvalidFormat(_) => ()
+    _ => fail("expected InvalidFormat error")
+  } noraise {
+    _ => (fail("expected error to be raised") : Unit)
+  }
+  @fs.remove_file(tmp)
+}

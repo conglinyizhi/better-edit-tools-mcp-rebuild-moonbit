@@ -107,3 +107,47 @@ test "目标行不在任何标签对内时返回 InvalidFormat" {
   }
   @fs.remove_file(tmp_file)
 }
+
+///|
+test "tag_range 跳过属性字符串中的大于号" {
+  @testutil.with_temp_file(base_name="tag-attr-gt", tmp => {
+    @fs.write_string_to_file(tmp, "<div data-x=\"a>b\">\nhello\n</div>\n")
+    let result = @check.be_tag_range(tmp, 2)
+    assert_eq(result.tag, "div")
+    assert_eq(result.range.start_line, 1)
+    assert_eq(result.range.end_line, 3)
+  })
+}
+
+///|
+test "tag_range 跳过单引号属性字符串中的大于号" {
+  @testutil.with_temp_file(base_name="tag-attr-gt-single", tmp => {
+    @fs.write_string_to_file(tmp, "<div data-x='a>b'>\nhello\n</div>\n")
+    let result = @check.be_tag_range(tmp, 2)
+    assert_eq(result.tag, "div")
+    assert_eq(result.range.start_line, 1)
+    assert_eq(result.range.end_line, 3)
+  })
+}
+
+///|
+test "tag_range 跳过 CDATA" {
+  @testutil.with_temp_file(base_name="tag-cdata", tmp => {
+    @fs.write_string_to_file(
+      tmp, "<root>\n<![CDATA[ <child> inside ]]>\nhello\n</root>\n",
+    )
+    let result = @check.be_tag_range(tmp, 4)
+    assert_eq(result.tag, "root")
+    assert_eq(result.range.start_line, 1)
+    assert_eq(result.range.end_line, 4)
+  })
+}
+
+///|
+test "tag_range 单行配对标签返回最内层" {
+  @testutil.with_temp_file(base_name="tag-single-line", tmp => {
+    @fs.write_string_to_file(tmp, "<div><span>hello</span></div>\n")
+    let result = @check.be_tag_range(tmp, 1)
+    assert_eq(result.tag, "span")
+  })
+}

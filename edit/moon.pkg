@@ -1,12 +1,20 @@
 import {
+  "conglinyizhi/better-edit-tools-mcp/check",
   "conglinyizhi/better-edit-tools-mcp/chip",
   "conglinyizhi/better-edit-tools-mcp/common",
   "conglinyizhi/better-edit-tools-mcp/error",
+  "conglinyizhi/better-edit-tools-mcp/read",
   "conglinyizhi/better-edit-tools-mcp/session",
   "conglinyizhi/better-edit-tools-mcp/snapshot",
+  "conglinyizhi/better-edit-tools-mcp/testutil",
   "conglinyizhi/better-edit-tools-mcp/write",
   "moonbitlang/x/fs",
   "moonbitlang/core/env",
   "moonbitlang/core/json",
   "moonbitlang/core/strconv",
 }
+
+options(
+  // read/testutil 仅在测试文件中使用
+  warnings: "-unused_package",
+)

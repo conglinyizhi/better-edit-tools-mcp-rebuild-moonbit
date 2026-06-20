@@ -31,3 +31,34 @@ test "scan_content_warnings does not warn for tab-dominant files" {
     warnings.contains("content contains tabs; prefer spaces for indentation"),
   )
 }
+
+///|
+test "scan_content_warnings blank lines only do not trigger trailing whitespace" {
+  let warnings = @common.scan_content_warnings("\n\n\n")
+  assert_false(warnings.contains("trailing whitespace"))
+  assert_false(warnings.contains("no newline at end of file"))
+}
+
+///|
+test "scan_content_warnings blank line with spaces does not false positive" {
+  let warnings = @common.scan_content_warnings("hello\n   \nworld\n")
+  assert_false(warnings.contains("trailing whitespace"))
+}
+
+///|
+test "scan_content_warnings empty content has no warnings" {
+  let warnings = @common.scan_content_warnings("")
+  assert_eq(warnings.length(), 0)
+}
+
+///|
+test "scan_content_warnings single line without newline reports missing newline" {
+  let warnings = @common.scan_content_warnings("hello")
+  assert_true(warnings.contains("no newline at end of file"))
+}
+
+///|
+test "scan_content_warnings multi-line newline-terminated text has no missing newline warning" {
+  let warnings = @common.scan_content_warnings("hello\nworld\n")
+  assert_false(warnings.contains("no newline at end of file"))
+}
