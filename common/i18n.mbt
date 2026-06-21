@@ -9,11 +9,10 @@ let translations : Ref[Map[String, Map[String, String]]] = {
 }
 
 ///|
-/// 从 `./i18n/{lang}.json` 加载翻译表。失败时返回空表。
-fn load_language(lang : String) -> Map[String, String] {
-  let path = "./i18n/" + lang + ".json"
-  let text = @fs.read_file_to_string(path) catch { _ => return Map::default() }
-  let json = @json.parse(text) catch { _ => return Map::default() }
+/// 从指定路径加载翻译表。失败时返回 None。
+fn try_load(path : String) -> Map[String, String]? {
+  let text = @fs.read_file_to_string(path) catch { _ => return None }
+  let json = @json.parse(text) catch { _ => return None }
   let result = Map::default()
   match json {
     Object(map) =>
@@ -25,7 +24,24 @@ fn load_language(lang : String) -> Map[String, String] {
       })
     _ => ()
   }
-  result
+  Some(result)
+}
+
+///|
+/// 从 `./i18n/{lang}.json` 开始加载翻译表。如果当前工作目录不是项目根目录，
+/// 则向上逐级父目录查找（最多 10 层），以兼容 native build 输出目录的深层路径。
+/// 失败时返回空表。
+fn load_language(lang : String) -> Map[String, String] {
+  let mut prefix = "./"
+  for _ in 0..<10 {
+    let path = prefix + "i18n/" + lang + ".json"
+    match try_load(path) {
+      Some(map) => return map
+      None => ()
+    }
+    prefix = prefix + "../"
+  }
+  Map::default()
 }
 
 ///|
