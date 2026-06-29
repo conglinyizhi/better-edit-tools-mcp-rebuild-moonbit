@@ -15,15 +15,15 @@ version = "0.1.0"
 
 readme = "README.mbt.md"
 
-repository = ""
+repository = "https://github.com/conglinyizhi/better-edit-tools-mcp-rebuild-moonbit"
 
 license = "Apache-2.0"
 
-keywords = [ ]
+keywords = [ "mcp", "editor", "tools", "agent", "llm", "cli" ]
 
 preferred_target = "wasm-gc"
 
-description = ""
+description = "MoonBit MCP file editing toolkit — atomic writes, function-scope detection, snapshot rollback, and fault-tolerant JSON parsing for AI agent toolchains."
 
 import {
   "moonbitlang/x@0.4.41",
