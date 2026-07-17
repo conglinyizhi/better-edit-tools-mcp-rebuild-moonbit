@@ -97,7 +97,7 @@ fn help_text() -> String {
 ///|
 /// 返回版本文本。
 fn version_text() -> String {
-  @common.t("cli.help.version") + " 0.1.0"
+  @common.t("cli.help.version") + " 0.1.1"
 }
 
 ///|

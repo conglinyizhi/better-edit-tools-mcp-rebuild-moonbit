@@ -122,7 +122,7 @@ pub fn serve(read_line : () -> String, write_line : (String) -> Unit) -> Unit {
       "initialize" => {
         let result : Json = {
           "protocolVersion": "2024-11-05",
-          "serverInfo": { "name": "better-edit-tools-mcp", "version": "0.1.0" },
+          "serverInfo": { "name": "better-edit-tools-mcp", "version": "0.1.1" },
           "capabilities": { "tools": { "listChanged": false } },
         }
         let resp = make_response(request.id, result)
