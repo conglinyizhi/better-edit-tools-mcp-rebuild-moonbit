@@ -12,8 +12,9 @@ import {
   "moonbitlang/core/strconv",
 }
 
+pkgtype(kind: "executable")
+
 options(
-  "is-main": true,
   targets: {
     "cli.mbt": [ "native", "llvm" ],
     "cli_wbtest.mbt": [ "native", "llvm" ],
