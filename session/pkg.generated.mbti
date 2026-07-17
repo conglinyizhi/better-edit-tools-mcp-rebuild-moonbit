@@ -22,6 +22,8 @@ pub(all) struct ReadSession {
   line_count : Int
   created_at : Int64
 } derive(ToJson, @debug.Debug)
+pub fn ReadSession::to_json(Self) -> Json
+pub fn ReadSession::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

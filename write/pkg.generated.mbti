@@ -24,6 +24,8 @@ pub(all) struct WriteResult {
   results : Array[String]
   warnings : Array[String]
 } derive(ToJson, @debug.Debug)
+pub fn WriteResult::to_json(Self) -> Json
+pub fn WriteResult::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

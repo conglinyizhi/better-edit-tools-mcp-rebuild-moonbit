@@ -8,6 +8,12 @@ pub(all) struct WriteResult {
 } derive(Debug, ToJson)
 
 ///|
+pub extend WriteResult with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend WriteResult with ToJson::{to_json}
+
+///|
 /// 从 markdown 代码块提取内容。
 /// 支持 ``` 与 ~~~ 围栏，返回第一个代码块内的文本。
 fn extract_markdown_code(content : String) -> String {

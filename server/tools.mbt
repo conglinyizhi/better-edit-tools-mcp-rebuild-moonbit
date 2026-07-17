@@ -7,6 +7,9 @@ pub(all) struct Tool {
 } derive(ToJson)
 
 ///|
+pub extend Tool with ToJson::{to_json}
+
+///|
 /// 返回服务器支持的所有工具定义。
 pub fn list_tools() -> Array[Tool] {
   let name = "be-read"

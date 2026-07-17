@@ -6,6 +6,12 @@ pub(all) struct BeReadResult {
 } derive(Debug, ToJson)
 
 ///|
+pub extend BeReadResult with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend BeReadResult with ToJson::{to_json}
+
+///|
 /// 按 "path:start-end"、"path:start~end" 或 "path:line" 格式读取文件。
 /// start、end、line 均为 1-based 行号；单独指定行号时只读取该行。
 /// 也可直接传 "path" 读取整个文件。

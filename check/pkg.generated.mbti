@@ -22,23 +22,31 @@ pub(all) struct BeBalanceResult {
   pairs : Array[BePair]
   mismatches : Array[BeMismatch]
 } derive(ToJson, @debug.Debug)
+pub fn BeBalanceResult::to_json(Self) -> Json
+pub fn BeBalanceResult::to_repr(Self) -> @debug.Repr
 
 pub(all) struct BeMismatch {
   kind : String
   loc : @common.BeLocation
   reason : String
 } derive(ToJson, @debug.Debug)
+pub fn BeMismatch::to_json(Self) -> Json
+pub fn BeMismatch::to_repr(Self) -> @debug.Repr
 
 pub(all) struct BePair {
   kind : String
   open : @common.BeLocation
   close : @common.BeLocation
 } derive(ToJson, @debug.Debug)
+pub fn BePair::to_json(Self) -> Json
+pub fn BePair::to_repr(Self) -> @debug.Repr
 
 pub(all) struct BeTagRangeResult {
   tag : String
   range : @common.BeRange
 } derive(ToJson, @debug.Debug)
+pub fn BeTagRangeResult::to_json(Self) -> Json
+pub fn BeTagRangeResult::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 pub using @common {type BeRange as BeFuncRangeResult}

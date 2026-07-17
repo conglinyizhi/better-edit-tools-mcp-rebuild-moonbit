@@ -28,6 +28,9 @@ jobs:
       - name: Check formatting
         run: moon fmt --check
 
+      - name: Typecheck (deny warnings, include future-default 79)
+        run: moon check --warn-list +79 --deny-warn
+
       - name: Run tests
         run: moon test
 

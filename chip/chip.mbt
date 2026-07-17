@@ -291,11 +291,23 @@ pub(all) struct ChipRecord {
 } derive(Debug, ToJson)
 
 ///|
+pub extend ChipRecord with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend ChipRecord with ToJson::{to_json}
+
+///|
 /// chip 队列信息。
 pub(all) struct ChipQueueInfo {
   count : Int
   capacity : Int
 } derive(Debug, ToJson)
+
+///|
+pub extend ChipQueueInfo with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend ChipQueueInfo with ToJson::{to_json}
 
 ///|
 fn chip_json_path(id : String) -> String {

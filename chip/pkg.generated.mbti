@@ -34,6 +34,8 @@ pub(all) struct ChipQueueInfo {
   count : Int
   capacity : Int
 } derive(ToJson, @debug.Debug)
+pub fn ChipQueueInfo::to_json(Self) -> Json
+pub fn ChipQueueInfo::to_repr(Self) -> @debug.Repr
 
 pub(all) struct ChipRecord {
   id : String
@@ -42,6 +44,8 @@ pub(all) struct ChipRecord {
   err_msg : String
   created_at : Int64
 } derive(ToJson, @debug.Debug)
+pub fn ChipRecord::to_json(Self) -> Json
+pub fn ChipRecord::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

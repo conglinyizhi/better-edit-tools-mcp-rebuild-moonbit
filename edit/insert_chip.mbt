@@ -5,6 +5,12 @@ pub(all) enum BeInsertChipResult {
 } derive(Debug, ToJson)
 
 ///|
+pub extend BeInsertChipResult with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend BeInsertChipResult with ToJson::{to_json}
+
+///|
 fn read_chip_content(from : String) -> String raise @error.BeError {
   if from.has_prefix("file:///") {
     let path = from[8:].to_owned()

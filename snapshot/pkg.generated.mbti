@@ -25,6 +25,8 @@ pub(all) struct QueueStats {
   capacity : Int
   disk_bytes : Int64
 } derive(ToJson, @debug.Debug)
+pub fn QueueStats::to_json(Self) -> Json
+pub fn QueueStats::to_repr(Self) -> @debug.Repr
 
 pub(all) struct SnapshotRecord {
   id : String
@@ -32,6 +34,8 @@ pub(all) struct SnapshotRecord {
   content : String
   created_at : Int64
 } derive(ToJson, @debug.Debug)
+pub fn SnapshotRecord::to_json(Self) -> Json
+pub fn SnapshotRecord::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

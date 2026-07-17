@@ -68,7 +68,7 @@ pub fn be_delete(
       to_delete.push(i)
     }
   }
-  let delete_set = Set::from_array(to_delete)
+  let delete_set = Set::Set(to_delete)
   let remaining : Array[String] = []
   for i = 0; i < all_lines.length(); i = i + 1 {
     let line_no = i + 1

@@ -9,6 +9,12 @@ pub(all) struct ReadSession {
 } derive(Debug, ToJson)
 
 ///|
+pub extend ReadSession with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend ReadSession with ToJson::{to_json}
+
+///|
 let session_rand : Ref[@random.Rand?] = { val: None }
 
 ///|

@@ -19,6 +19,9 @@ pub impl ToJson for RpcRequest with fn to_json(self) -> Json {
 }
 
 ///|
+pub extend RpcRequest with ToJson::{to_json}
+
+///|
 /// JSON-RPC 响应。
 pub(all) struct RpcResponse {
   jsonrpc : String
@@ -28,11 +31,17 @@ pub(all) struct RpcResponse {
 } derive(ToJson)
 
 ///|
+pub extend RpcResponse with ToJson::{to_json}
+
+///|
 /// JSON-RPC 错误对象。
 pub(all) struct RpcError {
   code : Int
   message : String
 } derive(ToJson)
+
+///|
+pub extend RpcError with ToJson::{to_json}
 
 ///|
 /// 从标准输入读取一行，直到换行符或 EOF。

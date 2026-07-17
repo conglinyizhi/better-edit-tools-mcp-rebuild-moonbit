@@ -19,11 +19,15 @@ pub(all) struct BeReadResult {
   viewed_code_id : String
   range : @common.BeRange
 } derive(ToJson, @debug.Debug)
+pub fn BeReadResult::to_json(Self) -> Json
+pub fn BeReadResult::to_repr(Self) -> @debug.Repr
 
 pub(all) struct BeTarget {
   kind : String
   value : String
 } derive(ToJson, @debug.Debug)
+pub fn BeTarget::to_json(Self) -> Json
+pub fn BeTarget::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

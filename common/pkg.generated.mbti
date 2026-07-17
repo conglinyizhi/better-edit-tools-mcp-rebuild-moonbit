@@ -44,12 +44,16 @@ pub(all) struct BeLocation {
   line : Int
   col : Int
 } derive(ToJson, @debug.Debug)
+pub fn BeLocation::to_json(Self) -> Json
+pub fn BeLocation::to_repr(Self) -> @debug.Repr
 
 pub(all) struct BeRange {
   start_line : Int
   end_line : Int
   content : String
 } derive(ToJson, @debug.Debug)
+pub fn BeRange::to_json(Self) -> Json
+pub fn BeRange::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

@@ -7,11 +7,23 @@ pub(all) struct BeRange {
 } derive(Debug, ToJson)
 
 ///|
+pub extend BeRange with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend BeRange with ToJson::{to_json}
+
+///|
 /// 表示文件中的一个位置（1-based 行号/列号）。
 pub(all) struct BeLocation {
   line : Int
   col : Int
 } derive(Debug, ToJson)
+
+///|
+pub extend BeLocation with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend BeLocation with ToJson::{to_json}
 
 ///|
 /// 计算 be-read 返回的 viewed_code_id，供 be-replace 校验使用。

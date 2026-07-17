@@ -22,6 +22,8 @@ pub(all) enum BeInsertChipResult {
   Inserted
   ChipIds(Array[String])
 } derive(ToJson, @debug.Debug)
+pub fn BeInsertChipResult::to_json(Self) -> Json
+pub fn BeInsertChipResult::to_repr(Self) -> @debug.Repr
 
 pub(all) struct EditResult {
   status : String
@@ -38,6 +40,8 @@ pub(all) struct EditResult {
   event_id : String
   queue_full : Bool
 } derive(ToJson, @debug.Debug)
+pub fn EditResult::to_json(Self) -> Json
+pub fn EditResult::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

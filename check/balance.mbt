@@ -6,6 +6,12 @@ pub(all) struct BePair {
 } derive(Debug, ToJson)
 
 ///|
+pub extend BePair with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend BePair with ToJson::{to_json}
+
+///|
 pub(all) struct BeMismatch {
   kind : String
   loc : @common.BeLocation
@@ -13,11 +19,23 @@ pub(all) struct BeMismatch {
 } derive(Debug, ToJson)
 
 ///|
+pub extend BeMismatch with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend BeMismatch with ToJson::{to_json}
+
+///|
 pub(all) struct BeBalanceResult {
   ok : Bool
   pairs : Array[BePair]
   mismatches : Array[BeMismatch]
 } derive(Debug, ToJson)
+
+///|
+pub extend BeBalanceResult with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend BeBalanceResult with ToJson::{to_json}
 
 ///|
 priv enum BalanceState {

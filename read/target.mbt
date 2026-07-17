@@ -6,6 +6,12 @@ pub(all) struct BeTarget {
 } derive(Debug, ToJson)
 
 ///|
+pub extend BeTarget with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend BeTarget with ToJson::{to_json}
+
+///|
 /// 根据 target 解析文件中的目标范围。
 /// kind 支持："line" | "function" | "marker" | "tag"。
 pub fn resolve_target_span(

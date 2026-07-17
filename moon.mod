@@ -26,5 +26,5 @@ preferred_target = "wasm-gc"
 description = "MoonBit MCP file editing toolkit — atomic writes, function-scope detection, snapshot rollback, and fault-tolerant JSON parsing for AI agent toolchains."
 
 import {
-  "moonbitlang/x@0.4.41",
+  "moonbitlang/x@0.4.46",
 }

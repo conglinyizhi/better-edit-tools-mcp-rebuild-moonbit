@@ -21,6 +21,7 @@ pub(all) struct RpcError {
   code : Int
   message : String
 } derive(ToJson)
+pub fn RpcError::to_json(Self) -> Json
 
 pub(all) struct RpcRequest {
   jsonrpc : String
@@ -28,6 +29,7 @@ pub(all) struct RpcRequest {
   method_ : String
   params : Json?
 }
+pub fn RpcRequest::to_json(Self) -> Json
 pub impl ToJson for RpcRequest
 
 pub(all) struct RpcResponse {
@@ -36,12 +38,14 @@ pub(all) struct RpcResponse {
   result : Json?
   error : RpcError?
 } derive(ToJson)
+pub fn RpcResponse::to_json(Self) -> Json
 
 pub(all) struct Tool {
   name : String
   description : String
   inputSchema : Json
 } derive(ToJson)
+pub fn Tool::to_json(Self) -> Json
 
 // Type aliases
 

@@ -24,3 +24,9 @@ pub(all) struct EditResult {
   event_id : String
   queue_full : Bool
 } derive(Debug, ToJson)
+
+///|
+pub extend EditResult with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend EditResult with ToJson::{to_json}

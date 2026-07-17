@@ -8,12 +8,24 @@ pub(all) struct SnapshotRecord {
 } derive(Debug, ToJson)
 
 ///|
+pub extend SnapshotRecord with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend SnapshotRecord with ToJson::{to_json}
+
+///|
 /// 快照队列统计。
 pub(all) struct QueueStats {
   used : Int
   capacity : Int
   disk_bytes : Int64
 } derive(Debug, ToJson)
+
+///|
+pub extend QueueStats with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend QueueStats with ToJson::{to_json}
 
 ///|
 let max_count : Int = 30

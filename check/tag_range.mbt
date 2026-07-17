@@ -6,6 +6,12 @@ pub(all) struct BeTagRangeResult {
 } derive(Debug, ToJson)
 
 ///|
+pub extend BeTagRangeResult with @moonbitlang/core/debug.Debug::{to_repr}
+
+///|
+pub extend BeTagRangeResult with ToJson::{to_json}
+
+///|
 priv struct OpenTag {
   name : String
   start_line : Int
