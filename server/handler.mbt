@@ -148,6 +148,8 @@ fn parse_insert_chip_target(to : String) -> (String, Int) raise @error.BeError {
 
 ///|
 /// 解析 target 对象为行范围。
+/// 委托 @read.resolve_target_span，保证 MCP 与库层语义一致：
+/// kind ∈ {line, function, marker, tag}，value 分别为行号/函数名/标记串/标签名。
 fn parse_target(
   file : String,
   target : Json,
@@ -160,72 +162,8 @@ fn parse_target(
   guard value != "" else {
     raise @error.BeError::InvalidFormat("target.value is required")
   }
-  match kind {
-    "line" => {
-      let dash = value.find("-")
-      match dash {
-        Some(idx) => {
-          let start = @strconv.from_str(value.sub(start=0, end=idx)) catch {
-            _ =>
-              raise @error.BeError::InvalidFormat(
-                "target line start must be integer: " + value,
-              )
-          }
-          let end = @strconv.from_str(
-            value.sub(start=idx + 1, end=value.length()),
-          ) catch {
-            _ =>
-              raise @error.BeError::InvalidFormat(
-                "target line end must be integer: " + value,
-              )
-          }
-          guard start >= 1 && end >= start else {
-            raise @error.BeError::InvalidFormat(
-              "target line range must satisfy 1 <= start <= end: " + value,
-            )
-          }
-          (start, end)
-        }
-        None => {
-          let line = @strconv.from_str(value) catch {
-            _ =>
-              raise @error.BeError::InvalidFormat(
-                "target line must be integer: " + value,
-              )
-          }
-          guard line >= 1 else {
-            raise @error.BeError::InvalidFormat(
-              "target line must be positive: " + value,
-            )
-          }
-          (line, line)
-        }
-      }
-    }
-    "function" => {
-      let line = @strconv.from_str(value) catch {
-        _ =>
-          raise @error.BeError::InvalidFormat(
-            "target function line must be integer: " + value,
-          )
-      }
-      let range = @check.be_func_range(file, line)
-      (range.start_line, range.end_line)
-    }
-    "tag" => {
-      let line = @strconv.from_str(value) catch {
-        _ =>
-          raise @error.BeError::InvalidFormat(
-            "target tag line must be integer: " + value,
-          )
-      }
-      let result = @check.be_tag_range(file, line)
-      (result.range.start_line, result.range.end_line)
-    }
-    "marker" =>
-      raise @error.BeError::InvalidFormat("marker target not supported")
-    _ => raise @error.BeError::InvalidFormat("unknown target kind: " + kind)
-  }
+  let range = @read.resolve_target_span(file, { kind, value })
+  (range.start_line, range.end_line)
 }
 
 ///|
