@@ -14,7 +14,16 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup MoonBit
-        uses: moonbitlang/setup-moonbit@v1
+        run: |
+          if ! command -v moon >/dev/null 2>&1; then
+            curl -fsSL https://cli.moonbitlang.com/install/main.sh | bash
+          fi
+          if [ -d "$HOME/.moon/bin" ]; then
+            echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+            export PATH="$HOME/.moon/bin:$PATH"
+          fi
+          moon version --all
+          moonc -v
 
       - name: Check formatting
         run: moon fmt --check

@@ -14,7 +14,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup MoonBit
-        uses: moonbitlang/setup-moonbit@v1
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/main.sh | bash
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
+      - name: Show MoonBit version
+        run: |
+          moon version --all
+          moonc -v
 
       - name: Check formatting
         run: moon fmt --check
@@ -27,3 +34,6 @@ jobs:
 
       - name: Generate interface info
         run: moon info
+
+      - name: Check interface files are up to date
+        run: git diff --exit-code
