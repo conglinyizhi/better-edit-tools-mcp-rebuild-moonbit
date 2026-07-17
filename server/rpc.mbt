@@ -129,11 +129,11 @@ pub fn serve(read_line : () -> String, write_line : (String) -> Unit) -> Unit {
         write_line(resp.to_json().stringify())
       }
       "tools/call" => {
-        let params = request.params.unwrap_or({})
+        let params = request.params.unwrap_or(Json::empty_object())
         let (name, args) = match params {
           { "name": String(n), "arguments": a, .. } => (n, a)
           { "name": String(n), "args": a, .. } => (n, a)
-          { "name": String(n), .. } => (n, {})
+          { "name": String(n), .. } => (n, Json::empty_object())
           _ => {
             let resp = make_error(
               request.id,

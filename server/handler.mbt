@@ -66,9 +66,9 @@ fn get_object(args : Json, key : String) -> Json {
     Object(map) =>
       match map.get(key) {
         Some(obj) => obj
-        _ => {}
+        _ => Json::empty_object()
       }
-    _ => {}
+    _ => Json::empty_object()
   }
 }
 

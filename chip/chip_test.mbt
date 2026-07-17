@@ -109,7 +109,7 @@ test "chip_queue_info 返回 count 与 capacity" {
 
 ///|
 test "save_chip 保存包含 _content 的删除内容" {
-  let args : Map[String, String] = {}
+  let args : Map[String, String] = Map([])
   args.set("_content", "deleted content here".repeat(5))
   let id = @chip.save_chip("be-delete", args, "")
   assert_true(id.length() > 0)
